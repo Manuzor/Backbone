@@ -1,0 +1,34 @@
+{
+  "folders":
+  [
+    {
+      "path": "."
+    }
+  ],
+  "build_systems":
+  [
+    {
+      "name": "Back Bone",
+      "file_regex": "^ *([A-z]:.*)[(]([0-9]+)[)]",
+
+
+      "variants":
+      [
+        {
+          "name": "Tests: Build Only",
+          "windows":
+          {
+            "cmd": [ "py", "-3", "${folder}/Build.py", "Tests" ],
+          },
+        },
+        {
+          "name": "Tests: Build and Run",
+          "windows":
+          {
+            "cmd": [ "py", "-3", "${folder}/Build.py", "Tests", "-Run" ],
+          },
+        }
+      ]
+    }
+  ]
+}
