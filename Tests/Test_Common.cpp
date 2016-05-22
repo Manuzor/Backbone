@@ -2,6 +2,7 @@
 
 #include "catch.hpp"
 
+
 TEST_CASE("Array Count", "[Common]")
 {
   SECTION("POD array")
@@ -58,8 +59,10 @@ struct CastDataFloat
 
 namespace casts
 {
-  int func(int&)       { return 42; }
-  int func(int const&) { return 64; }
+  int helper(int&)       { return 42; }
+  int helper(int const&) { return 64; }
+  int helper(int*)       { return 128; }
+  int helper(int const*) { return 512; }
 }
 
 TEST_CASE("Casts", "[Common]")
@@ -84,7 +87,9 @@ TEST_CASE("Casts", "[Common]")
   SECTION("As const")
   {
     int Data;
-    REQUIRE(casts::func(Data) == 42);
-    REQUIRE(casts::func(AsConst(Data)) == 64);
+    REQUIRE(casts::helper(Data) == 42);
+    REQUIRE(casts::helper(AsConst(Data)) == 64);
+    REQUIRE(casts::helper(&Data) == 128);
+    REQUIRE(casts::helper(AsPtrToConst(&Data)) == 512);
   }
 }

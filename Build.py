@@ -56,12 +56,17 @@ CommonLinkerOptions = [
 ];
 
 def RunProcess(*args):
-  return subprocess.run(*args, stdout=sys.stdout, stderr=sys.stderr)
+  sys.stdout.flush()
+  sys.stderr.flush()
+  Result = subprocess.run(*args, stdout=sys.stdout, stderr=sys.stderr)
+  sys.stdout.flush()
+  sys.stderr.flush()
+  return Result
 
 class CompilationException(Exception):
   pass
 
-def Compile(Name, AdditionalCompilerOptions, AdditionalLinkerOptions):
+def Compile(Name, AdditionalCompilerOptions, AdditionalLinkerOptions, PrintCommand=False):
   print("Compiling: {}".format(Name))
 
   Command = [str(Compiler)]
@@ -83,17 +88,25 @@ def Compile(Name, AdditionalCompilerOptions, AdditionalLinkerOptions):
   #
   # Run the command.
   #
-  Result = RunProcess(Command)
-  if Result.returncode != 0:
-    raise CompilationException("Unable to compile {}".format(Name))
 
-# 
+  with (BuildPath / "fbuild.bff").open("w") as File:
+    File.write("""
+
+""")
+
+  #if PrintCommand:
+  #  print(Command)
+  #Result = RunProcess(Command)
+  #if Result.returncode != 0:
+  #  raise CompilationException("Unable to compile {}".format(Name))
+
+#
 # Targets
 #
 
 def Target_Clean(Args):
   DryRun = "DryRun" in Args and Args["DryRun"] is True
-  Patterns = [ "*.obj", "*.pdb", "*.lib", "*.exe", "*.dll", "*.ilk", "*.exp" ]
+  Patterns = [ "*.obj", "*.pdb", "*.lib", "*.exe", "*.dll", "*.ilk", "*.exp", "*.cpp" ]
   print("In '{}':".format(BuildPath))
   for Pattern in Patterns:
     for File in BuildPath.glob(Pattern):
@@ -111,13 +124,14 @@ def Target_Tests(Args):
   CompilerOptions = [
     "/Fe{}".format(ExeName),
     "/EHsc", # Enable exceptions for Catch
+    "/MP8",  # Miltithreaded compilation
   ]
   CompilerOptions.extend(TestsPath.glob("*.cpp"))
   LinkerOptions = [
     "/PDB:{}.pdb".format(Name),
   ]
   try:
-    Compile(Name, CompilerOptions, LinkerOptions)
+    Compile(Name, CompilerOptions, LinkerOptions, PrintCommand=False)
   except: raise
   else:
     if "Run" in Args and Args["Run"] is True:
@@ -136,6 +150,7 @@ ArgValueConversion = {
 def Main():
   TargetName = None
   Args = {}
+  Verbose = False
 
   for Arg in sys.argv[1:]:
     if Arg.startswith("-"):
@@ -160,7 +175,11 @@ def Main():
     print("Unknown target name: {}".format(TargetName), file=sys.stderr)
     raise
   else:
-    Target(Args)
+    try:
+      Target(Args)
+    except:
+      if Verbose:
+        raise
 
 if __name__ == '__main__':
   Main()
