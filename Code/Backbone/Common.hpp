@@ -1,5 +1,29 @@
 #pragma once
 
+//
+// ================
+//
+
+#define NoOp do{  }while(0)
+
+#define Crash() *(int*)nullptr = 0
+
+#if defined(BB_Enable_Assert)
+  #define Assert(Expression) do{ if(!(Expression)) { Crash(); } } while(0)
+#else
+  #define Assert(Expression) NoOp
+#endif
+
+#if defined(BB_Enable_BoundsCheck)
+  #define BoundsCheck(Expression) Assert(Expression)
+#else
+  #define BoundsCheck(Expression) NoOp
+#endif
+
+//
+// ================
+//
+
 using int8  = char;
 using int16 = short;
 using int32 = int;
@@ -11,6 +35,21 @@ using uint32 = unsigned int;
 using uint64 = unsigned long long;
 
 using bool32 = int32;
+
+//
+// ================
+//
+
+constexpr uint64 KiB(uint64 Amount) { return Amount      * (uint64)1024; }
+constexpr uint64 MiB(uint64 Amount) { return KiB(Amount) * (uint64)1024; }
+constexpr uint64 GiB(uint64 Amount) { return MiB(Amount) * (uint64)1024; }
+constexpr uint64 TiB(uint64 Amount) { return GiB(Amount) * (uint64)1024; }
+
+constexpr uint64 KB(uint64 Amount) { return Amount     * (uint64)1000; }
+constexpr uint64 MB(uint64 Amount) { return KB(Amount) * (uint64)1000; }
+constexpr uint64 GB(uint64 Amount) { return MB(Amount) * (uint64)1000; }
+constexpr uint64 TB(uint64 Amount) { return GB(Amount) * (uint64)1000; }
+
 
 template<typename t_type, size_t N>
 constexpr size_t
@@ -206,19 +245,3 @@ struct _defer_impl
 // \param CaptureSpec The lambda capture specification.
 #define Defer(CaptureSpec, ...) auto _DeferFunc##__LINE__ = [CaptureSpec](){ __VA_ARGS__; }; \
 _defer_impl<decltype(_DeferFunc##__LINE__)> _Defer##__LINE__{ _DeferFunc##__LINE__ }
-
-#define NoOp do{  }while(0)
-
-#define Crash() *(int*)nullptr = 0
-
-#if defined(BB_Enable_Assert)
-  #define Assert(Expression) do{ if(!(Expression)) { Crash(); } } while(0)
-#else
-  #define Assert(Expression) NoOp
-#endif
-
-#if defined(BB_Enable_BoundsCheck)
-  #define BoundsCheck(Expression) Assert(Expression)
-#else
-  #define BoundsCheck(Expression) NoOp
-#endif

@@ -3,6 +3,19 @@
 #include "catch.hpp"
 
 
+TEST_CASE("Byte Sizes", "[Common]")
+{
+  REQUIRE(KiB(3) == 3 * 1024ULL);
+  REQUIRE(MiB(3) == 3 * 1024ULL * 1024ULL);
+  REQUIRE(GiB(3) == 3 * 1024ULL * 1024ULL * 1024ULL);
+  REQUIRE(TiB(3) == 3 * 1024ULL * 1024ULL * 1024ULL * 1024ULL);
+
+  REQUIRE(KB(3) == 3 * 1000ULL);
+  REQUIRE(MB(3) == 3 * 1000ULL * 1000ULL);
+  REQUIRE(GB(3) == 3 * 1000ULL * 1000ULL * 1000ULL);
+  REQUIRE(TB(3) == 3 * 1000ULL * 1000ULL * 1000ULL * 1000ULL);
+}
+
 TEST_CASE("Array Count", "[Common]")
 {
   SECTION("POD array")

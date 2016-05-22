@@ -89,16 +89,11 @@ def Compile(Name, AdditionalCompilerOptions, AdditionalLinkerOptions, PrintComma
   # Run the command.
   #
 
-  with (BuildPath / "fbuild.bff").open("w") as File:
-    File.write("""
-
-""")
-
-  #if PrintCommand:
-  #  print(Command)
-  #Result = RunProcess(Command)
-  #if Result.returncode != 0:
-  #  raise CompilationException("Unable to compile {}".format(Name))
+  if PrintCommand:
+    print(Command)
+  Result = RunProcess(Command)
+  if Result.returncode != 0:
+    raise CompilationException("Unable to compile {}".format(Name))
 
 #
 # Targets
