@@ -6,7 +6,6 @@
 
 
 .Compiler = '$VSBasePath$/VC/bin/amd64/cl.exe'
-.CompilerOutputPath = '$BuildPath$'
 .CompilerOptions = '/c %1 /Fo%2'
                    + ' /nologo'  // Supress compiler info print.
                    + ' /Z7'      // /Z{7|i|I} Debug information. (7 = in obj, i = in pbd)
@@ -55,12 +54,13 @@
 
 // Backbone Tests
 {
-  .SourcePath = 'Tests'
+  .SourcePath = 'Tests/Backbone'
 
   ObjectList( 'BackboneTests-Lib' )
   {
     .CompilerOptions + ' /EHsc'
     .CompilerInputPath = '$SourcePath$'
+    .CompilerOutputPath = '$BuildPath$/BackboneTests'
   }
 
   Executable( 'BackboneTests' )
