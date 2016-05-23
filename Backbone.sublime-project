@@ -8,7 +8,7 @@
   "build_systems":
   [
     {
-      "name": "Back Bone",
+      "name": "Backbone",
       "file_regex": "^ *([A-z]:.*)[(]([0-9]+)[)]",
 
 
@@ -18,14 +18,14 @@
           "name": "Tests: Build Only",
           "windows":
           {
-            "cmd": [ "py", "-3", "${folder}/Build.py", "Tests" ],
+            "cmd": [ "${folder}/Utilities/BackboneTests_BuildOnly.bat" ],
           },
         },
         {
           "name": "Tests: Build and Run",
           "windows":
           {
-            "cmd": [ "py", "-3", "${folder}/Build.py", "Tests", "-Run" ],
+            "cmd": [ "${folder}/Utilities/BackboneTests_BuildAndRun.bat" ],
           },
         }
       ]

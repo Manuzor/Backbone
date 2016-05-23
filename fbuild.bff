@@ -1,0 +1,83 @@
+
+#import VS140COMNTOOLS
+.VSBasePath = '$VS140COMNTOOLS$../..'
+
+.BuildPath = 'Build'
+
+
+.Compiler = '$VSBasePath$/VC/bin/amd64/cl.exe'
+.CompilerOutputPath = '$BuildPath$'
+.CompilerOptions = '/c %1 /Fo%2'
+                   + ' /nologo'  // Supress compiler info print.
+                   + ' /Z7'      // /Z{7|i|I} Debug information. (7 = in obj, i = in pbd)
+                   + ' /FC'      // Use full pathnames in diagnostics
+                   + ' /Od'      // Disable optimizations
+                   + ' /Oi'      // Generate intrinsic functions
+                   + ' /WX'      // Treat warnings as errors
+                   + ' /W4'      // /W<n> Set warning level (default n=1)
+                   + ' /wd4201'  // /wd<n> Disable warning number n.
+                   + ' /wd4100'  // /wd<n> Disable warning number n.
+                   + ' /wd4189'  // /wd<n> Disable warning number n.
+                   + ' /Gm-'     // /Gm[-] Enable minimal rebuild
+                   + ' /GR-'     // /GR[-]   Enable runtime type information
+                   + ' /EHa-'    // /EHa[-]  Something about exception handling
+                   + ' /TP'      // /TP      Compile all as .cpp
+                   + ' /MTd'     // /MD[d] /MT[d] Dynamically or statically linked C run-time library (d = debug)
+
+                   + ' /ICode'
+
+                   //
+                   // Defines
+                   //
+                   + ' /DBB_Platform_Windows'   // For a win32 build.
+                   + ' /DBB_Platform_x64'       // For x64 builds.
+                   + ' /DBB_Enable_Assert'      // Enable assertions.
+                   + ' /DBB_Enable_BoundsCheck' // Enable bounds checking.
+
+                   //
+                   // Windows specific defines
+                   //
+                   + ' /DNOMINMAX'                // Exclude annoying Windows macros.
+                   + ' /DWIN32_LEAN_AND_MEAN'     // Strip some rarely used Windows stuff.
+                   + ' /D_CRT_SECURE_NO_WARNINGS' // Shut up windows.h's warnings
+
+.Linker = '$VSBasePath$/VC/bin/amd64/link.exe'
+.LinkerOptions = '%1 /OUT:%2'
+                 + ' /DEBUG'          // Tell the linker that we're in debug mode. Required for PDBs to work
+                 + ' /nologo'         // Suppress linker info print.
+                 + ' /INCREMENTAL:NO' // No incremental linking.
+.Libraries = {}
+
+
+//
+// Targets
+//
+
+// Backbone Tests
+{
+  .SourcePath = 'Tests'
+
+  ObjectList( 'BackboneTests-Lib' )
+  {
+    .CompilerOptions + ' /EHsc'
+    .CompilerInputPath = '$SourcePath$'
+  }
+
+  Executable( 'BackboneTests' )
+  {
+    .Libraries + 'BackboneTests-Lib'
+    .LinkerOptions + ' /PDB:$BuildPath$/BackboneTests.pdb'
+    .LinkerOutput = '$BuildPath$/BackboneTests.exe'
+  }
+
+  Test( 'Run-BackboneTests' )
+  {
+    .TestExecutable = 'BackboneTests'
+    .TestOutput = '$BuildPath$/BackboneTests.txt'
+  }
+}
+
+Alias( 'all' )
+{
+  .Targets = { 'BackboneTests' }
+}
