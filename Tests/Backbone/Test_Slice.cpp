@@ -1,4 +1,5 @@
-#include <Backbone/Slice.hpp>
+// #include <Backbone/Slice.hpp>
+#include "../../Backbone.hpp"
 
 #include "catch.hpp"
 

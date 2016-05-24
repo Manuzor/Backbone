@@ -1,4 +1,5 @@
 
+//~~[[
 
 template<size_t N, typename t_element>
 template<typename t_index>
@@ -71,3 +72,5 @@ auto
 {
   return Slice(Slice(Block), InclusiveStartIndex, ExclusiveEndIndex);
 }
+
+//]]~~

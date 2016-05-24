@@ -3,6 +3,8 @@
 #include "Common.hpp"
 #include "Slice.hpp"
 
+//~~[[
+
 template<size_t N, typename t_element>
 struct fixed_block
 {
@@ -49,5 +51,7 @@ Slice(fixed_block<N, t_element>& Block);
 template<size_t N, typename t_element, typename t_start_index, typename t_end_index>
 slice<t_element>
 Slice(fixed_block<N, t_element>& Block, t_start_index InclusiveStartIndex, t_end_index ExclusiveEndIndex);
+
+//]]~~
 
 #include "FixedBlock.inl"

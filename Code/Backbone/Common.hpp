@@ -1,8 +1,6 @@
 #pragma once
 
-//
-// ================
-//
+//~~[[
 
 #define NoOp do{  }while(0)
 
@@ -245,3 +243,5 @@ struct _defer_impl
 // \param CaptureSpec The lambda capture specification.
 #define Defer(CaptureSpec, ...) auto _DeferFunc##__LINE__ = [CaptureSpec](){ __VA_ARGS__; }; \
 _defer_impl<decltype(_DeferFunc##__LINE__)> _Defer##__LINE__{ _DeferFunc##__LINE__ }
+
+//]]~~

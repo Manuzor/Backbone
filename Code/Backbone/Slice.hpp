@@ -2,6 +2,8 @@
 
 #include "Common.hpp"
 
+//~~[[
+
 template<typename t_element>
 struct slice
 {
@@ -240,3 +242,5 @@ SliceCopy(slice<t_type> Target, slice<t_type const> Source)
   }
   return Amount;
 }
+
+//]]~~

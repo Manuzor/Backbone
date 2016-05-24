@@ -1,4 +1,6 @@
 
+//~~[[
+
 auto
 ::ExtractPathDirectoryAndFileName(slice<char const> Path,
                                   slice<char const>* Out_Directory,
@@ -54,3 +56,5 @@ auto
   if(Options.AppendNull) Buffer[Result.Num] = '\0';
   return Result;
 }
+
+//]]~~
