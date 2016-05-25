@@ -1,5 +1,4 @@
-// #include <Backbone/FixedBlock.hpp>
-#include "../../Backbone.hpp"
+#include <Backbone/FixedBlock.hpp>
 
 #include "catch.hpp"
 

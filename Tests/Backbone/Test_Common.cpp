@@ -1,5 +1,4 @@
-// #include <Backbone/Common.hpp>
-#include "../../Backbone.hpp"
+#include <Backbone/Common.hpp>
 
 #include "catch.hpp"
 
