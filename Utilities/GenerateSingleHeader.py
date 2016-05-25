@@ -41,8 +41,6 @@ with OutFilePath.open("w", newline=NewLine) as OutFile:
 
 #pragma once
 
-#define BB_Inline inline
-
 """)
 
   FileName = Path("Backbone", "Common.hpp")

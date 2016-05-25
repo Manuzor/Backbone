@@ -59,12 +59,33 @@ struct slice<void const>
   operator bool() const { return Num && Data; }
 };
 
+template<typename t_type>
+typename slice<t_type>::element_type*
+First(slice<t_type> const& SomeSlice)
+{
+  return SomeSlice.Data;
+}
+
+template<typename t_type>
+typename slice<t_type>::element_type*
+Last(slice<t_type> const& SomeSlice)
+{
+  return MemAddOffset(First(SomeSlice), Max(1, SomeSlice.Num) - 1);
+}
+
+template<typename t_type>
+typename slice<t_type>::element_type*
+OnePastLast(slice<t_type> const& SomeSlice)
+{
+  return MemAddOffset(First(SomeSlice), SomeSlice.Num);
+}
+
 /// C++11 range API
 template<typename t_type>
 typename slice<t_type>::element_type*
 begin(slice<t_type> const& SomeSlice)
 {
-  return &SomeSlice[0];
+  return First(SomeSlice);
 }
 
 /// C++11 range API
@@ -72,23 +93,23 @@ template<typename t_type>
 typename slice<t_type>::element_type*
 end(slice<t_type> const& SomeSlice)
 {
-  return begin(SomeSlice) + SomeSlice.Num;
+  return OnePastLast(SomeSlice);
 }
 
 template<typename t_target, typename t_source>
 slice<t_target>
 SliceReinterpret(slice<t_source> SomeSlice)
 {
-  return CreateSlice(Reinterpret<t_target*>(begin(SomeSlice)),
-                     Reinterpret<t_target*>(end(SomeSlice)));
+  return CreateSlice(Reinterpret<t_target*>(First(SomeSlice)),
+                     Reinterpret<t_target*>(OnePastLast(SomeSlice)));
 }
 
 template<typename t_source>
 slice<t_source const>
 SliceAsConst(slice<t_source> SomeSlice)
 {
-  return CreateSlice(AsPtrToConst(begin(SomeSlice)),
-                     AsPtrToConst(end(SomeSlice)));
+  return CreateSlice(AsPtrToConst(First(SomeSlice)),
+                     AsPtrToConst(OnePastLast(SomeSlice)));
 }
 
 /// Concatenate two slices together.
@@ -123,14 +144,14 @@ SliceUnion(slice<t_element> SliceA, slice<t_element> SliceB)
 {
   // A union only makes sense when both slices are overlapping.
   Assert(SlicesAreOverlapping(SliceA, SliceB));
-  return { Min(begin(SliceA), begin(SliceB)), Max(end(SliceA), end(SliceB)) };
+  return { Min(First(SliceA), First(SliceB)), Max(OnePastLast(SliceA), OnePastLast(SliceB)) };
 }
 
 template<typename t_element_a, typename t_element_b>
 constexpr bool
 SlicesAreDisjoint(slice<t_element_a> SliceA, slice<t_element_b> SliceB)
 {
-  return end(SliceA) < begin(SliceB) || begin(SliceA) > end(SliceB);
+  return Last(SliceA) < First(SliceB) || First(SliceA) > Last(SliceB);
 }
 
 /// Whether SliceA and SliceB overlap.
@@ -149,7 +170,7 @@ template<typename t_element_a, typename t_element_b>
 constexpr bool
 SliceContains(slice<t_element_a> SliceA, slice<t_element_b> SliceB)
 {
-  return begin(SliceA) <= begin(SliceB) && end(SliceA) >= end(SliceB);
+  return First(SliceA) <= First(SliceB) && OnePastLast(SliceA) >= OnePastLast(SliceB);
 }
 
 template<typename t_element>
@@ -205,8 +226,8 @@ CreateSliceFromString(char* StringPtr)
 {
   auto Constified = Coerce<char const*>(StringPtr);
   auto Result = CreateSliceFromString(Constified);
-  return CreateSlice(Coerce<char*>(begin(Result)),
-                     Coerce<char*>(begin(Result)));
+  return CreateSlice(Coerce<char*>(First(Result)),
+                     Coerce<char*>(First(Result)));
 }
 
 /// Creates a new slice from an existing slice.
@@ -241,6 +262,41 @@ SliceCopy(slice<t_type> Target, slice<t_type const> Source)
     Target.Data[Index] = Source.Data[Index];
   }
   return Amount;
+}
+
+/// Compares the contents of the two slices for equality.
+///
+/// Two slices are deemed equal if they have the same number of elements and
+/// each individual element in A compares equal to the corresponding element
+/// in B in the order they appear in.
+template<typename t_element_a, typename t_element_b>
+bool
+operator ==(slice<t_element_a> A, slice<t_element_b> B)
+{
+  if(A.Num != B.Num) return false;
+
+  auto A_ = NonVoidPtr(First(A));
+  auto B_ = NonVoidPtr(First(B));
+  // if(A_ == B_) return true;
+  if(Coerce<size_t>(A_) == Coerce<size_t>(B_)) return true;
+
+  auto NumElements = A.Num;
+  while(NumElements)
+  {
+    if(*A_ == *B_)
+      --NumElements;
+    else
+      return false;
+  }
+
+  return true;
+}
+
+template<typename t_element_a, typename t_element_b>
+bool
+operator !=(slice<t_element_a> A, slice<t_element_b> B)
+{
+  return !(A == B);
 }
 
 //]]~~

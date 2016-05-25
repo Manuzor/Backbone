@@ -77,3 +77,39 @@ TEST_CASE("Slice casting", "[Slice]")
     REQUIRE(Baz[0] == *reinterpret_cast<int*>(&Bar[0]));
   }
 }
+
+TEST_CASE("Equality", "[Slice]")
+{
+  SECTION("Both Empty")
+  {
+    REQUIRE(slice<void>()  == slice<void>());
+    REQUIRE(slice<int32>() == slice<int32>());
+    REQUIRE(slice<int16>() == slice<int32>());
+  }
+
+  SECTION("Single Value")
+  {
+    int A = 42;
+    int B = 123;
+    int C = 42;
+    auto Foo = CreateSlice(1, &A);
+    auto Bar = CreateSlice(1, &B);
+    auto Baz = CreateSlice(1, &C);
+
+    REQUIRE(Foo == Foo);
+    REQUIRE(Foo != Bar);
+    REQUIRE(Foo == Baz);
+  }
+
+  SECTION("From Same Data")
+  {
+    int Data[] = { 1, 2, 1, 2, };
+    auto Foo = CreateSlice(2, &Data[0]);
+    auto Bar = CreateSlice(2, &Data[1]);
+    auto Baz = CreateSlice(2, &Data[2]);
+
+    REQUIRE(Foo == Foo);
+    REQUIRE(Foo != Bar);
+    REQUIRE(Foo == Baz);
+  }
+}

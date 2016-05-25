@@ -6,6 +6,14 @@
   #error The Backbone is only working on windows platforms for now.
 #endif
 
+#if !defined(BB_Inline)
+  #define BB_Inline inline
+#endif
+
+#if !defined(BB_ForceInline)
+  #define BB_ForceInline inline
+#endif
+
 #define NoOp do{  }while(0)
 
 #define Crash() *(int*)nullptr = 0
@@ -58,9 +66,31 @@ constexpr size_t
 ArrayCount(t_type(&)[N]) { return N; }
 
 // Used to get the size of a type with support for void where a size of 1 byte is assumed.
-template<typename T> struct non_void             { enum { Size = sizeof(T) }; };
-template<>           struct non_void<void>       { enum { Size = 1         }; };
-template<>           struct non_void<void const> { enum { Size = 1         }; };
+template<typename T> struct non_void { enum { Size = sizeof(T) }; };
+template<>           struct non_void<void>       : non_void<uint8>       { };
+template<>           struct non_void<void const> : non_void<uint8 const> { };
+
+/// Reinterpretation of the given pointer in case t_pointer_type is `void`.
+template<typename t_pointer_type>
+inline constexpr t_pointer_type*
+NonVoidPtr(t_pointer_type* Ptr)
+{
+  return Ptr;
+}
+
+/// Reinterpretation of the given pointer in case t_pointer_type is `void`.
+inline constexpr uint8*
+NonVoidPtr(void* Ptr)
+{
+  return reinterpret_cast<uint8*>(Ptr);
+}
+
+/// Reinterpretation of the given pointer in case t_pointer_type is `void`.
+inline constexpr uint8 const*
+NonVoidPtr(void const* Ptr)
+{
+  return reinterpret_cast<uint8 const*>(Ptr);
+}
 
 /// Advance the given pointer value by the given amount of bytes.
 template<typename t_pointer_type, typename OffsetType>
