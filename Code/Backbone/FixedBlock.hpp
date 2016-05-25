@@ -79,5 +79,3 @@ Slice(fixed_block<N, t_element>& Block, t_start_index InclusiveStartIndex, t_end
 }
 
 //]]~~
-
-#include "FixedBlock.inl"
