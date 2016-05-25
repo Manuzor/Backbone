@@ -46,6 +46,9 @@ using uint64 = unsigned long long;
 
 using bool32 = int32;
 
+/// Generic unsigned integer if you don't care much about the actual size.
+using uint = unsigned int;
+
 //
 // ================
 //
@@ -60,6 +63,19 @@ constexpr uint64 MB(uint64 Amount) { return KB(Amount) * (uint64)1000; }
 constexpr uint64 GB(uint64 Amount) { return MB(Amount) * (uint64)1000; }
 constexpr uint64 TB(uint64 Amount) { return GB(Amount) * (uint64)1000; }
 
+//
+// ================
+//
+
+constexpr double Pi64 = 3.14159265359;
+constexpr double E64 = 2.71828182845;
+
+constexpr float Pi32 = (float)Pi64;
+constexpr float E32  = (float)E64;
+
+//
+// ================
+//
 
 template<typename t_type, size_t N>
 constexpr size_t
@@ -194,7 +210,7 @@ template<typename t_type>
 constexpr t_type
 Sign(t_type I)
 {
-  return (I > 0) ? 1 : (I < 0) ? -1 : 0;
+  return (I > 0) ? t_type(1) : (I < 0) ? t_type(-1) : t_type(0);
 }
 
 template<typename t_type>
@@ -222,29 +238,40 @@ template<typename t_value_type, typename t_lower_bound_type, typename t_upper_bo
 constexpr t_value_type
 Clamp(t_value_type Value, t_lower_bound_type LowerBound, t_upper_bound_type UpperBound)
 {
-  return (Value < LowerBound) ? Coerce<t_value_type>(LowerBound) :
-         (Value > UpperBound) ? Coerce<t_value_type>(UpperBound) : Value;
+  return UpperBound < LowerBound ? Value : Min(UpperBound, Max(LowerBound, Value));
 }
 
-// TODO(Manu): Make it wrap a LowerBound as well.
+// TODO: Make this a constexpr
 template<typename t_value_type, typename t_lower_bound_type, typename t_upper_bound_type>
-constexpr t_value_type
+t_value_type
 Wrap(t_value_type Value, t_lower_bound_type LowerBound, t_upper_bound_type UpperBound)
 {
-  return Value > Coerce<t_value_type>(UpperBound) ? Value - Coerce<t_value_type>(UpperBound) - 1 :
-         Value < Coerce<t_value_type>(LowerBound) ? Value + Coerce<t_value_type>(LowerBound) - 1 :
-                                               Value;
+  const auto BoundsDelta = (Coerce<t_lower_bound_type>(UpperBound) - LowerBound);
+  while(Value >= UpperBound) Value -= BoundsDelta;
+  while(Value < LowerBound)  Value += BoundsDelta;
+  return Value;
+  // return Value >= UpperBound ? Value - BoundsDelta :
+  //        Value <  LowerBound ? Value + BoundsDelta :
+  //                              Value;
 }
 
 // Project a value from [LowerBound, UpperBound] to [0, 1]
 // Example:
-//   auto Result = NormalizeValue<real32>(15, 10, 30); // == 0.25f
+//   auto Result = NormalizeValue<float>(15, 10, 30); // == 0.25f
 template<typename t_result, typename t_value_type, typename t_lower_bound_type, typename t_upper_bound_type>
 constexpr t_result
 NormalizeValue(t_value_type Value, t_lower_bound_type LowerBound, t_upper_bound_type UpperBound)
 {
-  return (t_result)(Value - LowerBound) / (t_result)(UpperBound - LowerBound);
+  return UpperBound <= LowerBound ?
+         t_result(0) : // Bogus bounds.
+         Cast<t_result>(Value - LowerBound) / Cast<t_result>(UpperBound - LowerBound);
 }
+
+BB_Inline bool
+AreNearlyEqual(double A, double B, double Epsilon);
+
+BB_Inline bool
+AreNearlyEqual(float A, float B, float Epsilon);
 
 template<typename t_a, typename t_b>
 inline void
@@ -279,3 +306,5 @@ struct _defer_impl
 _defer_impl<decltype(_DeferFunc##__LINE__)> _Defer##__LINE__{ _DeferFunc##__LINE__ }
 
 //]]~~
+
+#include "Common.inl"

@@ -26,7 +26,7 @@ TEST_CASE("Array Count", "[Common]")
 
   SECTION("String literal")
   {
-    REQUIRE(ArrayCount("Foo") == 4);
+    REQUIRE(ArrayCount("Foo") == 3 + 1);
   }
 }
 
@@ -78,31 +78,104 @@ namespace casts
   int helper(int const*) { return 512; }
 }
 
-TEST_CASE("Casts", "[Common]")
+TEST_CASE("Cast", "[Common]")
 {
-  SECTION("Regular casting")
-  {
-    REQUIRE(Cast<float>(1) == 1.0f);
-    REQUIRE(Cast<CastDataInt>(CastDataFloat()).Data == 42);
-  }
+  REQUIRE(Cast<float>(1) == 1.0f);
+  REQUIRE(Cast<CastDataInt>(CastDataFloat()).Data == 42);
+}
 
-  SECTION("Reinterpretation")
-  {
-    int Data;
-    REQUIRE(Reinterpret<void*>(&Data) == (void*)&Data);
-  }
+TEST_CASE("Reinterpret", "[Common]")
+{
+  int Data;
+  REQUIRE(Reinterpret<void*>(&Data) == (void*)&Data);
+}
 
-  SECTION("Coercion")
-  {
-    REQUIRE(Coerce<float>((int)42) == (float)((int)42));
-  }
+TEST_CASE("Coerce", "[Common]")
+{
+  REQUIRE(Coerce<float>((int)42) == (float)((int)42));
+}
 
-  SECTION("As const")
-  {
-    int Data;
-    REQUIRE(casts::helper(Data) == 42);
-    REQUIRE(casts::helper(AsConst(Data)) == 64);
-    REQUIRE(casts::helper(&Data) == 128);
-    REQUIRE(casts::helper(AsPtrToConst(&Data)) == 512);
-  }
+TEST_CASE("AsConst", "[Common]")
+{
+  int Data;
+  REQUIRE(casts::helper(Data) == 42);
+  REQUIRE(casts::helper(AsConst(Data)) == 64);
+  REQUIRE(casts::helper(&Data) == 128);
+  REQUIRE(casts::helper(AsPtrToConst(&Data)) == 512);
+}
+
+TEST_CASE("Sign", "[Common]")
+{
+  REQUIRE(Sign(   0) == 0);
+  REQUIRE(Sign( 0.0) == 0.0);
+  REQUIRE(Sign(0.0f) == 0.0f);
+
+  REQUIRE(Sign( 1.0f) ==  1.0f);
+  REQUIRE(Sign(-1.0f) == -1.0f);
+
+  REQUIRE(Sign(uint(42))  == 1);
+  REQUIRE(Sign(uint(-42)) == 1); // Underflow.
+}
+
+TEST_CASE("Min", "[Common]")
+{
+  REQUIRE(Min( 0,  1) == 0);
+  REQUIRE(Min( 1,  0) == 0);
+  REQUIRE(Min(-1,  0) == -1);
+  REQUIRE(Min( 0, -1) == -1);
+
+  REQUIRE(Min(uint64(0), float(1)) == uint64(0));
+  REQUIRE(Min(uint64(1), float(0)) == uint64(0));
+}
+
+TEST_CASE("Max", "[Common]")
+{
+  REQUIRE(Max( 0,  1) == 1);
+  REQUIRE(Max( 1,  0) == 1);
+  REQUIRE(Max(-1,  0) == 0);
+  REQUIRE(Max( 0, -1) == 0);
+
+  REQUIRE(Max(uint64(0), float(1)) == uint64(1));
+  REQUIRE(Max(uint64(1), float(0)) == uint64(1));
+}
+
+TEST_CASE("Clamp", "[Common]")
+{
+  REQUIRE(Clamp(10, 5, 15) == 10);
+  REQUIRE(Clamp( 5, 5, 15) ==  5);
+  REQUIRE(Clamp(15, 5, 15) == 15);
+  REQUIRE(Clamp(20, 5, 15) == 15);
+  REQUIRE(Clamp( 0, 5, 15) ==  5);
+
+  REQUIRE(Clamp(10, 15, 5) ==  10);
+}
+
+TEST_CASE("Wrap", "[Common]")
+{
+  REQUIRE(Wrap(10, 5, 15) == 10);
+  REQUIRE(Wrap(15, 5, 15) == 5);
+  REQUIRE(Wrap(16, 5, 15) == 6);
+  REQUIRE(Wrap(5, 5, 15)  == 5);
+  REQUIRE(Wrap(4, 5, 15)  == 14);
+
+  REQUIRE(Wrap(  0, -10, 10) ==   0);
+  REQUIRE(Wrap(  1, -10, 10) ==   1);
+  REQUIRE(Wrap( 10, -10, 10) == -10);
+  REQUIRE(Wrap( 15, -10, 10) ==  -5);
+  REQUIRE(Wrap(-15, -10, 10) ==   5);
+
+  REQUIRE(Wrap( 30, 5, 15) == 10);  //  30 => 20 => 10
+  REQUIRE(Wrap(-10, 5, 15) == 10);  // -10 =>  0 => 10
+}
+
+TEST_CASE("NormalizeValue", "[Common]")
+{
+  REQUIRE(NormalizeValue<float>(15, 10, 30) == 0.25f);
+  REQUIRE(NormalizeValue<float>(15, 30, 10) == 0.0f); // Invalid bounds.
+}
+
+TEST_CASE("AreNearlyEqual", "[Common]")
+{
+  REQUIRE( AreNearlyEqual(0.9f, 1.1f,  /* Epsilon: */ 0.200001f));
+  REQUIRE(!AreNearlyEqual(0.9f, 1.11f, /* Epsilon: */ 0.2f));
 }
