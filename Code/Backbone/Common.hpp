@@ -2,6 +2,10 @@
 
 //~~[[
 
+#if !defined(BB_Platform_Windows)
+  #error The Backbone is only working on windows platforms for now.
+#endif
+
 #define NoOp do{  }while(0)
 
 #define Crash() *(int*)nullptr = 0
