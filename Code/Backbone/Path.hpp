@@ -4,12 +4,18 @@
 
 //~~[[
 
-// TODO(Manu): Cross platform.
-enum { SystemFileSystemPathSeparator = '\\', };
+enum
+{
+  Win32_FileSystemPathSeparator = '\\',
+  Posix_FileSystemPathSeparator = '/',
+
+  // TODO(Manu): Cross platform.
+  Sys_FileSystemPathSeparator = Win32_FileSystemPathSeparator,
+};
 
 struct path_options
 {
-  char Separator = SystemFileSystemPathSeparator;
+  char Separator = Sys_FileSystemPathSeparator;
   bool32 AppendNull = false;
 };
 
