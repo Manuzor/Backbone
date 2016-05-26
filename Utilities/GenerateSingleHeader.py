@@ -10,6 +10,8 @@ CodePath = Path(ThisDir.parent, "Code")
 
 NewLine = "\n"
 
+SeparateInlineFile = False
+
 
 def TransformLines(Lines):
   Lower = 0
@@ -32,10 +34,16 @@ def TransformLines(Lines):
 
 
 with OutFilePath.open("w", newline=NewLine) as OutFile:
-  def WriteLine(*args, **kwargs):
+  def PrintLine(*args, **kwargs):
     print(*args, **kwargs, file=OutFile)
 
-  WriteLine("""
+  def PrintIncludeOrigin(FileName):
+    FileNameStr = FileName.as_posix()
+    PrintLine("// ============{}====".format("=" * len(FileNameStr)))
+    PrintLine("// === Source: {} ===".format(FileNameStr))
+    PrintLine("// ============{}====".format("=" * len(FileNameStr)))
+
+  PrintLine("""
 // This file was generated using the tool Utilities/GenerateSingleHeader.py
 // from the Backbone project.
 
@@ -46,48 +54,55 @@ with OutFilePath.open("w", newline=NewLine) as OutFile:
   FileName = Path("Backbone", "Common.hpp")
   with (CodePath / FileName).open("r") as File:
     TheLines = TransformLines(File.readlines())
-    WriteLine("//")
-    WriteLine("// From Source File: {}".format(FileName.as_posix()))
-    WriteLine("//")
-    WriteLine(TheLines)
+    PrintIncludeOrigin(FileName)
+    PrintLine(TheLines)
 
   FileName = Path("Backbone", "Slice.hpp")
   with (CodePath / FileName).open("r") as File:
     TheLines = TransformLines(File.readlines())
-    WriteLine("//")
-    WriteLine("// From Source File: {}".format(FileName.as_posix()))
-    WriteLine("//")
-    WriteLine(TheLines)
+    PrintIncludeOrigin(FileName)
+    PrintLine(TheLines)
+
+  FileName = Path("Backbone", "Angle.hpp")
+  with (CodePath / FileName).open("r") as File:
+    TheLines = TransformLines(File.readlines())
+    PrintIncludeOrigin(FileName)
+    PrintLine(TheLines)
 
   FileName = Path("Backbone", "Path.hpp")
   with (CodePath / FileName).open("r") as File:
     TheLines = TransformLines(File.readlines())
-    WriteLine("//")
-    WriteLine("// From Source File: {}".format(FileName.as_posix()))
-    WriteLine("//")
-    WriteLine(TheLines)
-
-  FileName = Path("Backbone", "Path.inl")
-  with (CodePath / FileName).open("r") as File:
-    TheLines = TransformLines(File.readlines())
-    WriteLine("//")
-    WriteLine("// From Source File: {}".format(FileName.as_posix()))
-    WriteLine("//")
-    WriteLine(TheLines)
+    PrintIncludeOrigin(FileName)
+    PrintLine(TheLines)
 
   FileName = Path("Backbone", "FixedBlock.hpp")
   with (CodePath / FileName).open("r") as File:
     TheLines = TransformLines(File.readlines())
-    WriteLine("//")
-    WriteLine("// From Source File: {}".format(FileName.as_posix()))
-    WriteLine("//")
-    WriteLine(TheLines)
+    PrintIncludeOrigin(FileName)
+    PrintLine(TheLines)
 
-  FileName = Path("Backbone", "FixedBlock.inl")
-  with (CodePath / FileName).open("r") as File:
-    TheLines = TransformLines(File.readlines())
-    WriteLine("//")
-    WriteLine("// From Source File: {}".format(FileName.as_posix()))
-    WriteLine("//")
-    WriteLine(TheLines)
+  if SeparateInlineFile:
+    assert False, "Not implemented."
+  else:
+    PrintLine("// ====================")
+    PrintLine("// === Inline Files ===")
+    PrintLine("// ====================")
+    PrintLine("")
 
+    FileName = Path("Backbone", "Common.inl")
+    with (CodePath / FileName).open("r") as File:
+      TheLines = TransformLines(File.readlines())
+      PrintIncludeOrigin(FileName)
+      PrintLine(TheLines)
+
+    FileName = Path("Backbone", "Angle.inl")
+    with (CodePath / FileName).open("r") as File:
+      TheLines = TransformLines(File.readlines())
+      PrintIncludeOrigin(FileName)
+      PrintLine(TheLines)
+
+    FileName = Path("Backbone", "Path.inl")
+    with (CodePath / FileName).open("r") as File:
+      TheLines = TransformLines(File.readlines())
+      PrintIncludeOrigin(FileName)
+      PrintLine(TheLines)

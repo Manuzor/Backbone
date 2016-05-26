@@ -1,4 +1,6 @@
 
+//~~[[
+
 auto
 ::AreNearlyEqual(double A, double B, double Epsilon)
   -> bool
@@ -12,3 +14,5 @@ auto
 {
   return Abs(A - B) <= Epsilon;
 }
+
+//]]~~

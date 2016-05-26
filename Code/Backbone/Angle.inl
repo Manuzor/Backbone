@@ -1,4 +1,6 @@
 
+//~~[[
+
 auto
 ::IsNormalized(radians Radians)
   -> bool
@@ -59,3 +61,4 @@ auto
   return AreNearlyEqual(A.Value, B.Value, Epsilon.Value);
 }
 
+//]]~~
