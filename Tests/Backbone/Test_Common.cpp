@@ -179,3 +179,71 @@ TEST_CASE("AreNearlyEqual", "[Common]")
   REQUIRE( AreNearlyEqual(0.9f, 1.1f,  /* Epsilon: */ 0.200001f));
   REQUIRE(!AreNearlyEqual(0.9f, 1.11f, /* Epsilon: */ 0.2f));
 }
+
+namespace
+{
+  struct SomeDataCounter
+  {
+    int DefaultConstructions = 0;
+    int CopyConstructions = 0;
+    int MoveConstructions = 0;
+    int Destructions = 0;
+  };
+
+  struct SomeData
+  {
+    static SomeDataCounter* Counter;
+
+    SomeData()                { Counter->DefaultConstructions++; }
+    SomeData(SomeData const&) { Counter->CopyConstructions++; }
+    SomeData(SomeData&&)      { Counter->MoveConstructions++; }
+    ~SomeData()               { Counter->Destructions++; }
+  };
+  SomeDataCounter* SomeData::Counter = nullptr;
+
+  void TestCopy(SomeData Something) {}
+  void TestMove(SomeData&& Something) {}
+}
+
+TEST_CASE("Move", "[Common]")
+{
+  SomeDataCounter Counter;
+  SomeData::Counter = &Counter;
+  Defer(, SomeData::Counter = nullptr);
+
+  SomeData Something;
+  REQUIRE( Counter.DefaultConstructions == 1 );
+  REQUIRE( Counter.CopyConstructions    == 0 );
+  REQUIRE( Counter.MoveConstructions    == 0 );
+  REQUIRE( Counter.Destructions         == 0 );
+
+  TestCopy(Something);
+  REQUIRE( Counter.DefaultConstructions == 1 );
+  REQUIRE( Counter.CopyConstructions    == 1 );
+  REQUIRE( Counter.MoveConstructions    == 0 );
+  REQUIRE( Counter.Destructions         == 1 );
+
+  TestMove(Move(Something));
+  REQUIRE( Counter.DefaultConstructions == 1 );
+  REQUIRE( Counter.CopyConstructions    == 1 );
+  REQUIRE( Counter.MoveConstructions    == 0 );
+  REQUIRE( Counter.Destructions         == 1 );
+
+  TestCopy(Move(Something));
+  REQUIRE( Counter.DefaultConstructions == 1 );
+  REQUIRE( Counter.CopyConstructions    == 1 );
+  REQUIRE( Counter.MoveConstructions    == 1 );
+  REQUIRE( Counter.Destructions         == 2 );
+
+  TestCopy(SomeData());
+  REQUIRE( Counter.DefaultConstructions == 2 );
+  REQUIRE( Counter.CopyConstructions    == 1 );
+  REQUIRE( Counter.MoveConstructions    == 1 );
+  REQUIRE( Counter.Destructions         == 3 );
+
+  TestMove(Move(SomeData()));
+  REQUIRE( Counter.DefaultConstructions == 3 );
+  REQUIRE( Counter.CopyConstructions    == 1 );
+  REQUIRE( Counter.MoveConstructions    == 1 );
+  REQUIRE( Counter.Destructions         == 4 );
+}
