@@ -10,22 +10,22 @@ struct slice
   using element_type = t_element;
 
   size_t Num;
-  element_type* Data;
+  element_type* Ptr;
 
   /// Test whether this slice is valid or not.
   ///
   /// A slice is considered valid if it does not point to null and contains at
   /// least one element.
-  operator bool() const { return Num && Data; }
+  operator bool() const { return Num && Ptr; }
 
   /// Index operator to access elements of the slice.
   template<typename t_index_type>
   auto
   operator[](t_index_type Index) const
-    -> decltype(Data[Index])
+    -> decltype(Ptr[Index])
   {
     BoundsCheck(Index >= 0 && Index < Num);
-    return Data[Index];
+    return Ptr[Index];
   }
 };
 
@@ -35,13 +35,13 @@ struct slice<void>
   using element_type = void;
 
   size_t Num;
-  element_type* Data;
+  element_type* Ptr;
 
   /// Test whether this slice is valid or not.
   ///
   /// A slice is considered valid if it does not point to null and contains at
   /// least one element.
-  operator bool() const { return Num && Data; }
+  operator bool() const { return Num && Ptr; }
 };
 
 template<>
@@ -50,20 +50,20 @@ struct slice<void const>
   using element_type = void const;
 
   size_t Num;
-  element_type* Data;
+  element_type* Ptr;
 
   /// Test whether this slice is valid or not.
   ///
   /// A slice is considered valid if it does not point to null and contains at
   /// least one element.
-  operator bool() const { return Num && Data; }
+  operator bool() const { return Num && Ptr; }
 };
 
 template<typename t_type>
 typename slice<t_type>::element_type*
 First(slice<t_type> const& SomeSlice)
 {
-  return SomeSlice.Data;
+  return SomeSlice.Ptr;
 }
 
 template<typename t_type>
@@ -175,9 +175,9 @@ SliceContains(slice<t_element_a> SliceA, slice<t_element_b> SliceB)
 
 template<typename t_element>
 constexpr slice<t_element>
-CreateSlice(size_t Num, t_element* Data)
+CreateSlice(size_t Num, t_element* Ptr)
 {
-  return { Num, Data };
+  return { Num, Ptr };
 }
 
 template<typename t_element>
@@ -189,7 +189,7 @@ CreateSlice(t_element* Begin, t_element* End)
 
   slice<t_element> Result;
   Result.Num = EndInt < BeginInt ? 0 : BeginInt - EndInt;
-  Result.Data = Begin;
+  Result.Ptr = Begin;
   return Result;
 }
 
@@ -241,7 +241,7 @@ Slice(slice<t_element> SomeSlice, t_start_index InclusiveStartIndex, t_end_index
   Assert(InclusiveStartIndex <= ExclusiveEndIndex);
   slice<t_element> Result;
   Result.Num = ExclusiveEndIndex - InclusiveStartIndex;
-  Result.Data = MemAddOffset(SomeSlice.Data, InclusiveStartIndex);
+  Result.Ptr = MemAddOffset(SomeSlice.Ptr, InclusiveStartIndex);
   BoundsCheck(SliceContains(SomeSlice, Result));
   return Result;
 }
@@ -256,10 +256,10 @@ SliceCopy(slice<t_type> Target, slice<t_type const> Source)
   size_t Amount = Min(Target.Num, Source.Num);
   // TODO(Manu): memcpy?
   // size_t Bytes = Amount * sizeof(t_type);
-  // ::memcpy(Target.Data, Source.Data, Bytes);
+  // ::memcpy(Target.Ptr, Source.Ptr, Bytes);
   for(size_t Index = 0; Index < Amount; ++Index)
   {
-    Target.Data[Index] = Source.Data[Index];
+    Target.Ptr[Index] = Source.Ptr[Index];
   }
   return Amount;
 }

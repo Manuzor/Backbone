@@ -9,7 +9,7 @@ TEST_CASE("Slice creation", "[Slice]")
   {
     slice<int> Foo = {};
     REQUIRE(Foo.Num == 0);
-    REQUIRE(Foo.Data == nullptr);
+    REQUIRE(Foo.Ptr == nullptr);
   }
 
   SECTION("From number and pointer")
@@ -25,7 +25,7 @@ TEST_CASE("Slice creation", "[Slice]")
     int Foo[] = {0, 1, 2};
     auto Bar = CreateSlice(Foo);
     REQUIRE(Bar.Num == ArrayCount(Foo));
-    REQUIRE(Bar.Data == &Foo[0]);
+    REQUIRE(Bar.Ptr == &Foo[0]);
   }
 
   SECTION("From string")
@@ -35,11 +35,11 @@ TEST_CASE("Slice creation", "[Slice]")
 
     auto Foo = CreateSliceFromString(CharArray);
     REQUIRE(Foo.Num == ArrayCount(CharArray) - 1);
-    REQUIRE(Foo.Data == &CharArray[0]);
+    REQUIRE(Foo.Ptr == &CharArray[0]);
 
     auto Bar = CreateSliceFromString(String);
     REQUIRE(Bar.Num == ArrayCount(CharArray) - 1);
-    REQUIRE(Bar.Data == String);
+    REQUIRE(Bar.Ptr == String);
   }
 }
 
@@ -54,9 +54,9 @@ TEST_CASE("Slice implicit bool conversion", "[Slice]")
     REQUIRE(Cast<bool>(Foo) == false);
   }
 
-  SECTION("Set Data")
+  SECTION("Set Ptr")
   {
-    Foo.Data = Coerce<int*, uint64>(42);
+    Foo.Ptr = Coerce<int*, uint64>(42);
     REQUIRE(Cast<bool>(Foo) == false);
   }
 }
