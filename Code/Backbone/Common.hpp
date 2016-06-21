@@ -1,5 +1,8 @@
 #pragma once
 
+// TODO Get rid of this?
+#include <type_traits>
+
 //~~[[
 
 #if !defined(BB_Platform_Windows)
@@ -123,6 +126,10 @@ MemAddOffset(t_pointer_type* Pointer, OffsetType Offset)
 {
   return MemAddByteOffset(Pointer, Offset * non_void<t_pointer_type>::Size);
 }
+
+template<typename T>
+constexpr bool
+IsPOD() { return std::is_pod<T>::value; }
 
 template<typename t_type>
 struct impl_rm_ref

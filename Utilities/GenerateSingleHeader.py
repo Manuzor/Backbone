@@ -1,6 +1,18 @@
 from pathlib import Path
+import argparse
 
-OutFilePath = Path.cwd() / "Backbone.hpp"
+Parser = argparse.ArgumentParser(description="Pack all Backbone sources into as few source files as possible to make distribution easier.")
+Parser.add_argument("outpath",
+                    type=Path,
+                    default=Path.cwd(),
+                    nargs="?",
+                    help="")
+
+Args = Parser.parse_args()
+
+OutBasePath = Args.outpath
+OutHeaderFilePath = OutBasePath / "Backbone.hpp"
+OutTranslationUnitFilePath = OutBasePath / "Backbone.cpp"
 
 BeginMarker = "~~[["
 EndMarker   = "]]~~"
@@ -33,7 +45,7 @@ def TransformLines(Lines):
   return NewLine.join(L.rstrip("\r\n") for L in Lines[Lower : Upper])
 
 
-with OutFilePath.open("w", newline=NewLine) as OutFile:
+with OutHeaderFilePath.open("w", newline=NewLine) as OutFile:
   def PrintLine(*args, **kwargs):
     print(*args, **kwargs, file=OutFile)
 
@@ -49,9 +61,18 @@ with OutFilePath.open("w", newline=NewLine) as OutFile:
 
 #pragma once
 
+// For placement-new.
+#include <new>
+
 """)
 
   FileName = Path("Backbone", "Common.hpp")
+  with (CodePath / FileName).open("r") as File:
+    TheLines = TransformLines(File.readlines())
+    PrintIncludeOrigin(FileName)
+    PrintLine(TheLines)
+
+  FileName = Path("Backbone", "Memory.hpp")
   with (CodePath / FileName).open("r") as File:
     TheLines = TransformLines(File.readlines())
     PrintIncludeOrigin(FileName)
@@ -106,3 +127,27 @@ with OutFilePath.open("w", newline=NewLine) as OutFile:
       TheLines = TransformLines(File.readlines())
       PrintIncludeOrigin(FileName)
       PrintLine(TheLines)
+
+with OutTranslationUnitFilePath.open("w", newline=NewLine) as OutFile:
+  def PrintLine(*args, **kwargs):
+    print(*args, **kwargs, file=OutFile)
+
+  def PrintIncludeOrigin(FileName):
+    FileNameStr = FileName.as_posix()
+    PrintLine("// ============{}====".format("=" * len(FileNameStr)))
+    PrintLine("// === Source: {} ===".format(FileNameStr))
+    PrintLine("// ============{}====".format("=" * len(FileNameStr)))
+
+  PrintLine("""
+// This file was generated using the tool Utilities/GenerateSingleHeader.py
+// from the Backbone project.
+
+#include "Backbone.hpp"
+
+""")
+
+  FileName = Path("Backbone", "Memory.cpp")
+  with (CodePath / FileName).open("r") as File:
+    TheLines = TransformLines(File.readlines())
+    PrintIncludeOrigin(FileName)
+    PrintLine(TheLines)
