@@ -26,7 +26,7 @@ TEST_CASE("MemDefaultConstruct", "[Memory]")
 {
   int Ints[4] = { 1, 1, 1, 1 };
 
-  MemDefaultConstruct(&Ints[0], 4);
+  MemDefaultConstruct(4, &Ints[0]);
   REQUIRE( Ints[0] == 0 );
   REQUIRE( Ints[1] == 0 );
   REQUIRE( Ints[2] == 0 );

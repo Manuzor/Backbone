@@ -286,7 +286,7 @@ template<typename T>
 void
 SliceDefaultConstruct(slice<T> Target)
 {
-  MemDefaultConstruct(Target.Ptr, Target.Num);
+  MemDefaultConstruct(Target.Num, Target.Ptr);
 }
 
 template<typename T>
@@ -294,7 +294,7 @@ size_t
 SliceCopyConstruct(slice<T> Target, slice<T const> Source)
 {
   size_t Amount = Min(Target.Num, Source.Num);
-  MemCopy(Target.Ptr, SourcePtr Amount);
+  MemCopy(Amount, Target.Ptr, SourcePtr);
   return Amount;
 }
 
@@ -303,7 +303,7 @@ size_t
 SliceMoveConstruct(slice<T> Target, slice<T const> Source)
 {
   size_t Amount = Min(Target.Num, Source.Num);
-  MemMove(Target.Ptr, SourcePtr Amount);
+  MemMove(Amount, Target.Ptr, SourcePtr);
   return Amount;
 }
 
@@ -311,7 +311,7 @@ template<typename T>
 void
 SliceDestruct(slice<T> Target)
 {
-  MemDestruct(Target.Ptr, Target.Num);
+  MemDestruct(Target.Num, Target.Ptr);
 }
 
 template<typename T>
