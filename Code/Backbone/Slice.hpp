@@ -109,7 +109,7 @@ SliceReinterpret(slice<SourceType> SomeSlice)
 
 template<typename SourceType>
 slice<SourceType const>
-SliceAsConst(slice<SourceType> SomeSlice)
+AsConst(slice<SourceType> SomeSlice)
 {
   return Slice(AsPtrToConst(First(SomeSlice)),
                AsPtrToConst(OnePastLast(SomeSlice)));
@@ -187,17 +187,25 @@ template<typename ElementType>
 slice<ElementType>
 Slice(ElementType* FirstPtr, ElementType* OnePastLastPtr)
 {
-  auto OnePastLastInt = Reinterpret<size_t>(OnePastLastPtr);
-  auto FirstInt = Reinterpret<size_t>(FirstPtr);
+  auto OnePastLastPtr_ = NonVoidPtr(OnePastLastPtr);
+  auto FirstPtr_       = NonVoidPtr(FirstPtr);
+
+  DebugCode(
+  {
+    auto A = Reinterpret<size_t>(FirstPtr);
+    auto B = Reinterpret<size_t>(OnePastLastPtr);
+    auto Delta = Max(A, B) - Min(A, B);
+    Assert(Delta % sizeof(ElementType) == 0);
+  });
 
   slice<ElementType> Result;
-  Result.Num = OnePastLastInt < FirstInt ? 0 : FirstInt - OnePastLastInt;
+  Result.Num = OnePastLastPtr_ <= FirstPtr_ ? 0 : OnePastLastPtr_ - FirstPtr_;
   Result.Ptr = FirstPtr;
   return Result;
 }
 
 template<typename ElementType, size_t N>
-slice<ElementType>
+constexpr slice<ElementType>
 Slice(ElementType (&Array)[N])
 {
   return { N, &Array[0] };
@@ -205,35 +213,19 @@ Slice(ElementType (&Array)[N])
 
 /// Create a char slice from a static char array, excluding '\0'.
 template<size_t N>
-slice<char const>
+constexpr slice<char const>
 SliceFromString(char const(&StringLiteral)[N])
 {
   return { N - 1, &StringLiteral[0] };
 }
 
 /// \param StringPtr Must be null-terminated.
-inline
 slice<char const>
-SliceFromString(char const* StringPtr)
-{
-  auto Seek = StringPtr;
-  size_t Count = 0;
-  while(*Seek++) ++Count;
-  return { Count, StringPtr };
-}
+SliceFromString(char const* StringPtr);
 
 /// \param StringPtr Must be null-terminated.
-inline
 slice<char>
-SliceFromString(char* StringPtr)
-{
-  auto Constified = Coerce<char const*>(StringPtr);
-  auto ConstResult = SliceFromString(Constified);
-  slice<char> Result;
-  Result.Num = ConstResult.Num;
-  Result.Ptr = Coerce<char*>(ConstResult.Ptr);
-  return Result;
-}
+SliceFromString(char* StringPtr);
 
 /// Creates a new slice from an existing slice.
 ///
@@ -316,7 +308,7 @@ SliceDestruct(slice<T> Target)
 
 template<typename T>
 size_t
-SliceCountUntil(slice<T> Haystack, const T& Needle)
+SliceCountUntil(slice<T const> Haystack, const T& Needle)
 {
   size_t Index = 0;
 

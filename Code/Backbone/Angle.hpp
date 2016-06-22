@@ -52,13 +52,13 @@ inline void operator /=(degrees& A, float Scale) { A.Value /= Scale; }
 constexpr inline degrees
 ToDegrees(radians Radians)
 {
-  return { Radians.Value * (180.0f / Pi32) };
+  return { Radians.Value * (180.0f / Pi()) };
 }
 
 constexpr inline radians
 ToRadians(degrees Degrees)
 {
-  return { Degrees.Value * (Pi32 / 180.0f) };
+  return { Degrees.Value * (Pi() / 180.0f) };
 }
 
 //

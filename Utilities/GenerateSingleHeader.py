@@ -110,12 +110,6 @@ with OutHeaderFilePath.open("w", newline=NewLine) as OutFile:
     PrintLine("// ====================")
     PrintLine("")
 
-    FileName = Path("Backbone", "Common.inl")
-    with (CodePath / FileName).open("r") as File:
-      TheLines = TransformLines(File.readlines())
-      PrintIncludeOrigin(FileName)
-      PrintLine(TheLines)
-
     FileName = Path("Backbone", "Angle.inl")
     with (CodePath / FileName).open("r") as File:
       TheLines = TransformLines(File.readlines())
@@ -144,7 +138,22 @@ with OutTranslationUnitFilePath.open("w", newline=NewLine) as OutFile:
 
 #include "Backbone.hpp"
 
+#include <cmath>
+#include <cstring>
+
 """)
+
+  FileName = Path("Backbone", "Common.cpp")
+  with (CodePath / FileName).open("r") as File:
+    TheLines = TransformLines(File.readlines())
+    PrintIncludeOrigin(FileName)
+    PrintLine(TheLines)
+
+  FileName = Path("Backbone", "Slice.cpp")
+  with (CodePath / FileName).open("r") as File:
+    TheLines = TransformLines(File.readlines())
+    PrintIncludeOrigin(FileName)
+    PrintLine(TheLines)
 
   FileName = Path("Backbone", "Memory.cpp")
   with (CodePath / FileName).open("r") as File:

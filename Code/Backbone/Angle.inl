@@ -5,14 +5,14 @@ auto
 ::IsNormalized(radians Radians)
   -> bool
 {
-  return Radians.Value >= 0.0f && Radians.Value < 2.0f * Pi32;
+  return Radians.Value >= 0.0f && Radians.Value < 2.0f * Pi();
 }
 
 auto
 ::Normalized(radians Radians)
   -> radians
 {
-  return { Wrap(Radians.Value, 0.0f, 2.0f * Pi32) };
+  return { Wrap(Radians.Value, 0.0f, 2.0f * Pi()) };
 }
 
 auto
@@ -21,7 +21,7 @@ auto
 {
   // Taken from ezEngine who got it from here:
   // http://gamedev.stackexchange.com/questions/4467/comparing-angles-and-working-out-the-difference
-  return { Pi32 - Abs(Abs(A.Value - B.Value) - Pi32) };
+  return { Pi() - Abs(Abs(A.Value - B.Value) - Pi()) };
 }
 
 auto

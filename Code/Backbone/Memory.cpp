@@ -1,9 +1,9 @@
 #include "Memory.hpp"
 
-//~~[[
-
 #include <cstring>
 
+
+//~~[[
 
 auto
 ::MemCopyBytes(size_t NumBytes, void* Destination, void const* Source)

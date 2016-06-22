@@ -20,6 +20,24 @@ TEST_CASE("Slice creation", "[Slice]")
     REQUIRE(FooSlice[0] == 42);
   }
 
+  SECTION("From begin and end pointer")
+  {
+    REQUIRE( Slice<int>(nullptr, nullptr).Num == 0 );
+    REQUIRE( Slice<int>(nullptr, nullptr).Ptr == nullptr );
+
+    int Foos[] = {0, 1, 2};
+
+    auto Foo1 = Slice(&Foos[0], &Foos[0]);
+    REQUIRE(Foo1.Num == 0);
+    REQUIRE(Foo1.Ptr == &Foos[0]);
+
+    auto Foo2 = Slice(&Foos[0], &Foos[3]);
+    REQUIRE(Foo2.Num == 3);
+    REQUIRE(Foo2[0] == Foos[0]);
+    REQUIRE(Foo2[1] == Foos[1]);
+    REQUIRE(Foo2[2] == Foos[2]);
+  }
+
   SECTION("From static array")
   {
     int Foo[] = {0, 1, 2};
@@ -135,11 +153,11 @@ TEST_CASE("Slice Searching", "[Slice]")
 
   SECTION("CountUntil")
   {
-    REQUIRE( SliceCountUntil(Slice<int>((size_t)0, nullptr), 42) == INVALID_INDEX );
+    REQUIRE( SliceCountUntil(Slice<int const>((size_t)0, nullptr), 42) == INVALID_INDEX );
 
-    REQUIRE( SliceCountUntil(Foo, 0) == 0 );
-    REQUIRE( SliceCountUntil(Foo, 2) == 2 );
-    REQUIRE( SliceCountUntil(Foo, 6) == 6 );
-    REQUIRE( SliceCountUntil(Foo, 7) == INVALID_INDEX );
+    REQUIRE( SliceCountUntil(AsConst(Foo), 0) == 0 );
+    REQUIRE( SliceCountUntil(AsConst(Foo), 2) == 2 );
+    REQUIRE( SliceCountUntil(AsConst(Foo), 6) == 6 );
+    REQUIRE( SliceCountUntil(AsConst(Foo), 7) == INVALID_INDEX );
   }
 }

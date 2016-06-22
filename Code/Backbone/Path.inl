@@ -35,7 +35,7 @@ auto
                                   path_options Options)
   -> size_t
 {
-  return ExtractPathDirectoryAndFileName(SliceAsConst(Path),
+  return ExtractPathDirectoryAndFileName(AsConst(Path),
                                          Coerce<slice<char const>*>(Out_Directory), Coerce<slice<char const>*>(Out_Name),
                                          Options);
 }

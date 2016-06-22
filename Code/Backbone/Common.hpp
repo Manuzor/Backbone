@@ -28,9 +28,19 @@
 #endif
 
 #if defined(BB_Enable_BoundsCheck)
-  #define BoundsCheck(Expression) Assert(Expression)
+  #define BoundsCheck(...) Assert(__VA_ARGS__)
 #else
-  #define BoundsCheck(Expression) NoOp
+  #define BoundsCheck(...) NoOp
+#endif
+
+#ifdef DEBUG
+  #define BB_Debugging 1
+#endif
+
+#if BB_Debugging
+  #define DebugCode(...) __VA_ARGS__
+#else
+  #define DebugCode(...) /* Empty */
 #endif
 
 //
@@ -70,11 +80,13 @@ constexpr uint64 TB(uint64 Amount) { return GB(Amount) * (uint64)1000; }
 // ================
 //
 
-constexpr double Pi64 = 3.14159265359;
-constexpr double E64 = 2.71828182845;
+template<typename T = float>
+constexpr T
+Pi() { return (T)3.14159265359; }
 
-constexpr float Pi32 = (float)Pi64;
-constexpr float E32  = (float)E64;
+template<typename T = float>
+constexpr T
+E() { return (T)2.71828182845; }
 
 //
 // ================
@@ -130,6 +142,30 @@ MemAddOffset(t_pointer_type* Pointer, OffsetType Offset)
 template<typename T>
 constexpr bool
 IsPOD() { return std::is_pod<T>::value; }
+
+template<typename T>
+constexpr size_t
+NumBits() { return sizeof(T) * 8; }
+
+template<typename T>
+constexpr bool
+IntIsSigned() { return ((T)-1) < 0; }
+
+template<typename T>
+constexpr T
+IntMaxValue()
+{
+  return IntIsSigned<T>() ? (T(1) << (NumBits<T>() - 1)) - T(1)
+                          : T(0);
+}
+
+template<typename T>
+constexpr T
+IntMinValue()
+{
+  return IntIsSigned<T>() ? -(T(1) << (NumBits<T>() - 1))
+                          : (T(1) << NumBits<T>());
+}
 
 template<typename t_type>
 struct impl_rm_ref
@@ -276,6 +312,16 @@ Wrap(t_value_type Value, t_lower_bound_type LowerBound, t_upper_bound_type Upper
   //                              Value;
 }
 
+double
+Pow(double Base, double Exponent);
+
+float
+Pow(float Base, float Exponent);
+
+template<typename ReturnType = double, typename BaseType, typename ExponentType>
+constexpr ReturnType
+Pow(BaseType Base, ExponentType Exponent) { return (ReturnType)Pow((double)Base, (double)Exponent); }
+
 // Project a value from [LowerBound, UpperBound] to [0, 1]
 // Example:
 //   auto Result = NormalizeValue<float>(15, 10, 30); // == 0.25f
@@ -288,10 +334,10 @@ NormalizeValue(t_value_type Value, t_lower_bound_type LowerBound, t_upper_bound_
          Cast<t_result>(Value - LowerBound) / Cast<t_result>(UpperBound - LowerBound);
 }
 
-BB_Inline bool
+bool
 AreNearlyEqual(double A, double B, double Epsilon);
 
-BB_Inline bool
+bool
 AreNearlyEqual(float A, float B, float Epsilon);
 
 template<typename t_a, typename t_b>
@@ -332,5 +378,3 @@ struct _defer_impl
 _defer_impl<decltype(PRE_Concat2(_DeferFunc, __LINE__))> PRE_Concat2(_Defer, __LINE__){ PRE_Concat2(_DeferFunc, __LINE__) }
 
 //]]~~
-
-#include "Common.inl"

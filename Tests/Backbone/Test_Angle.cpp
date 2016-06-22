@@ -4,15 +4,15 @@
 
 TEST_CASE("Angle Conversion", "[Angle]")
 {
-  REQUIRE(ToRadians(degrees{180}).Value == Pi32);
-  REQUIRE(ToRadians(degrees{90}).Value  == Pi32 * 0.5f);
-  REQUIRE(ToRadians(degrees{270}).Value == Pi32 * 1.5f);
-  REQUIRE(ToRadians(degrees{360}).Value == Pi32 * 2.0f);
+  REQUIRE(ToRadians(degrees{180}).Value == Pi<float>());
+  REQUIRE(ToRadians(degrees{90}).Value  == Pi<float>() * 0.5f);
+  REQUIRE(ToRadians(degrees{270}).Value == Pi<float>() * 1.5f);
+  REQUIRE(ToRadians(degrees{360}).Value == Pi<float>() * 2.0f);
 
-  REQUIRE(ToDegrees(radians{       Pi32}).Value == 180);
-  REQUIRE(ToDegrees(radians{0.5f * Pi32}).Value == 90);
-  REQUIRE(ToDegrees(radians{1.5f * Pi32}).Value == 270);
-  REQUIRE(ToDegrees(radians{2.0f * Pi32}).Value == 360);
+  REQUIRE(ToDegrees(radians{       Pi<float>()}).Value == 180);
+  REQUIRE(ToDegrees(radians{0.5f * Pi<float>()}).Value == 90);
+  REQUIRE(ToDegrees(radians{1.5f * Pi<float>()}).Value == 270);
+  REQUIRE(ToDegrees(radians{2.0f * Pi<float>()}).Value == 360);
 }
 
 TEST_CASE("Angle Normalization", "[Angle]")

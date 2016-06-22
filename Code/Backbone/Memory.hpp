@@ -115,7 +115,7 @@ struct impl_mem_set<T, false>
 
 template<typename T>
 void
-MemSet(T* Destination, T Value, size_t Num)
+MemSet(size_t Num, T* Destination, T Value)
 {
   impl_mem_set<T, IsPOD<T>()>::Do(Num, Destination, Move(Value));
 }
