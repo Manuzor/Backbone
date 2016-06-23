@@ -351,6 +351,33 @@ operator ==(slice<ElementTypeA> A, slice<ElementTypeB> B)
   return true;
 }
 
+
+template<typename ElementType>
+bool
+operator ==(slice<ElementType> Slice, nullptr_t)
+{
+  return !Cast<bool>(Slice);
+}
+template<typename ElementType>
+bool
+operator !=(slice<ElementType> Slice, nullptr_t)
+{
+  return Cast<bool>(Slice);
+}
+
+template<typename ElementType>
+bool
+operator ==(nullptr_t, slice<ElementType> Slice)
+{
+  return !(Slice == nullptr);
+}
+template<typename ElementType>
+bool
+operator !=(nullptr_t, slice<ElementType> Slice)
+{
+  return Slice != nullptr;
+}
+
 template<typename ElementTypeA, typename ElementTypeB>
 bool
 operator !=(slice<ElementTypeA> A, slice<ElementTypeB> B)
