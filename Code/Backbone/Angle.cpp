@@ -1,5 +1,7 @@
 #include "Angle.hpp"
 
+#include <cmath>
+
 //~~[[
 
 
@@ -59,6 +61,55 @@ auto
   -> bool
 {
   return AreNearlyEqual(A.InternalData, B.InternalData, Epsilon.InternalData);
+}
+
+auto
+::Sin(angle Angle)
+  -> float
+{
+  return std::sin(ToRadians(Angle));
+}
+
+auto
+::Cos(angle Angle)
+  -> float
+{
+  return std::cos(ToRadians(Angle));
+}
+
+auto
+::Tan(angle Angle)
+  -> float
+{
+  return std::tan(ToRadians(Angle));
+}
+
+auto
+::ASin(float A)
+  -> angle
+{
+  return Radians(std::asin(A));
+}
+
+auto
+::ACos(float A)
+  -> angle
+{
+  return Radians(std::acos(A));
+}
+
+auto
+::ATan(float A)
+  -> angle
+{
+  return Radians(std::atan(A));
+}
+
+auto
+::ATan2(float A, float B)
+  -> angle
+{
+  return Radians(std::atan2(A, B));
 }
 
 //]]~~

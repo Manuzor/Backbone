@@ -74,4 +74,29 @@ AngleBetween(angle A, angle B);
 bool
 AreNearlyEqual(angle A, angle B, angle Epsilon = angle{ 0.0001f });
 
+//
+// Trigonometric Functions
+//
+
+float
+Sin(angle Angle);
+
+float
+Cos(angle Angle);
+
+float
+Tan(angle Angle);
+
+angle
+ASin(float A);
+
+angle
+ACos(float A);
+
+angle
+ATan(float A);
+
+angle
+ATan2(float A, float B);
+
 //]]~~
