@@ -20,6 +20,20 @@ auto
 }
 
 auto
+::Sqrt(double Value)
+  -> double
+{
+  return std::sqrt(Value);
+}
+
+auto
+::Sqrt(float Value)
+  -> float
+{
+  return std::sqrt(Value);
+}
+
+auto
 ::AreNearlyEqual(double A, double B, double Epsilon)
   -> bool
 {

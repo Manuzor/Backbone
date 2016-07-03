@@ -322,6 +322,16 @@ template<typename ReturnType = double, typename BaseType, typename ExponentType>
 constexpr ReturnType
 Pow(BaseType Base, ExponentType Exponent) { return (ReturnType)Pow((double)Base, (double)Exponent); }
 
+double
+Sqrt(double Value);
+
+float
+Sqrt(float Value);
+
+template<typename ReturnType = double, typename T>
+constexpr ReturnType
+Sqrt(T Value) { return (ReturnType)Sqrt((double)Value); }
+
 // Project a value from [LowerBound, UpperBound] to [0, 1]
 // Example:
 //   auto Result = NormalizeValue<float>(15, 10, 30); // == 0.25f
