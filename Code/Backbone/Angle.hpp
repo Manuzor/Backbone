@@ -4,96 +4,74 @@
 
 //~~[[
 
-struct radians { float Value; };
+struct angle { float InternalData; };
 
-constexpr inline bool    operator ==(radians A, radians B)   { return A.Value == B.Value;    }
-constexpr inline bool    operator !=(radians A, radians B)   { return A.Value != B.Value;    }
-constexpr inline bool    operator < (radians A, radians B)   { return A.Value <  B.Value;    }
-constexpr inline bool    operator <=(radians A, radians B)   { return A.Value <= B.Value;    }
-constexpr inline bool    operator > (radians A, radians B)   { return A.Value >  B.Value;    }
-constexpr inline bool    operator >=(radians A, radians B)   { return A.Value >= B.Value;    }
+constexpr bool operator ==(angle A, angle B) { return A.InternalData == B.InternalData; }
+constexpr bool operator !=(angle A, angle B) { return A.InternalData != B.InternalData; }
+constexpr bool operator < (angle A, angle B) { return A.InternalData <  B.InternalData; }
+constexpr bool operator <=(angle A, angle B) { return A.InternalData <= B.InternalData; }
+constexpr bool operator > (angle A, angle B) { return A.InternalData >  B.InternalData; }
+constexpr bool operator >=(angle A, angle B) { return A.InternalData >= B.InternalData; }
 
-constexpr inline radians operator + (radians A, radians B)   { return { A.Value + B.Value }; }
-constexpr inline radians operator - (radians A, radians B)   { return { A.Value - B.Value }; }
-constexpr inline radians operator * (radians A, float Scale) { return { A.Value * Scale };   }
-constexpr inline radians operator * (float Scale, radians A) { return { Scale * A.Value };   }
-constexpr inline radians operator / (radians A, float Scale) { return { A.Value / Scale };   }
+constexpr angle operator +(angle A, angle B)     { return { A.InternalData + B.InternalData }; }
+constexpr angle operator -(angle A, angle B)     { return { A.InternalData - B.InternalData }; }
+constexpr angle operator *(angle A, float Scale) { return { A.InternalData * Scale };   }
+constexpr angle operator *(float Scale, angle A) { return { Scale * A.InternalData };   }
+constexpr angle operator /(angle A, float Scale) { return { A.InternalData / Scale };   }
 
-inline void operator +=(radians& A, radians B)   { A.Value += B.Value; }
-inline void operator -=(radians& A, radians B)   { A.Value -= B.Value; }
-inline void operator *=(radians& A, float Scale) { A.Value *= Scale; }
-inline void operator /=(radians& A, float Scale) { A.Value /= Scale; }
+void operator +=(angle& A, angle B);
+void operator -=(angle& A, angle B);
+void operator *=(angle& A, float Scale);
+void operator /=(angle& A, float Scale);
 
-
-struct degrees { float Value; };
-
-constexpr inline bool    operator ==(degrees A, degrees B)   { return A.Value == B.Value;    }
-constexpr inline bool    operator !=(degrees A, degrees B)   { return A.Value != B.Value;    }
-constexpr inline bool    operator < (degrees A, degrees B)   { return A.Value <  B.Value;    }
-constexpr inline bool    operator <=(degrees A, degrees B)   { return A.Value <= B.Value;    }
-constexpr inline bool    operator > (degrees A, degrees B)   { return A.Value >  B.Value;    }
-constexpr inline bool    operator >=(degrees A, degrees B)   { return A.Value >= B.Value;    }
-
-constexpr inline degrees operator + (degrees A, degrees B)   { return { A.Value + B.Value }; }
-constexpr inline degrees operator - (degrees A, degrees B)   { return { A.Value - B.Value }; }
-constexpr inline degrees operator * (degrees A, float Scale) { return { A.Value * Scale };   }
-constexpr inline degrees operator * (float Scale, degrees A) { return { Scale * A.Value };   }
-constexpr inline degrees operator / (degrees A, float Scale) { return { A.Value / Scale };   }
-
-inline void operator +=(degrees& A, degrees B)   { A.Value += B.Value; }
-inline void operator -=(degrees& A, degrees B)   { A.Value -= B.Value; }
-inline void operator *=(degrees& A, float Scale) { A.Value *= Scale; }
-inline void operator /=(degrees& A, float Scale) { A.Value /= Scale; }
 
 //
 // Angle Conversion
 //
 
-constexpr inline degrees
-ToDegrees(radians Radians)
+constexpr angle
+Radians(float RadiansValue)
 {
-  return { Radians.Value * (180.0f / Pi()) };
+  return { RadiansValue };
 }
 
-constexpr inline radians
-ToRadians(degrees Degrees)
+constexpr float
+ToRadians(angle Angle)
 {
-  return { Degrees.Value * (Pi() / 180.0f) };
+  return Angle.InternalData;
+}
+
+constexpr angle
+Degrees(float DegreesValue)
+{
+  return { DegreesValue * (Pi() / 180.0f) };
+}
+
+constexpr float
+ToDegrees(angle Angle)
+{
+  return { Angle.InternalData * (180.0f / Pi()) };
 }
 
 //
 // Angle Normalization
 //
 
-BB_Inline bool
-IsNormalized(radians Radians);
+bool
+IsNormalized(angle Angle);
 
-BB_Inline radians
-Normalized(radians Radians);
+angle
+Normalized(angle Angle);
 
-BB_Inline radians
-AngleBetween(radians A, radians B);
-
-BB_Inline bool
-IsNormalized(degrees Degrees);
-
-BB_Inline degrees
-Normalized(degrees Degrees);
-
-BB_Inline degrees
-AngleBetween(degrees A, degrees B);
+angle
+AngleBetween(angle A, angle B);
 
 //
 // Equality
 //
 
 /// Checks whether A and B are nearly equal with the given Epsilon.
-BB_Inline bool
-AreNearlyEqual(radians A, radians B, radians Epsilon = radians{ 0.0001f });
-
-BB_Inline bool
-AreNearlyEqual(degrees A, degrees B, degrees Epsilon = degrees{ 0.01f   });
+bool
+AreNearlyEqual(angle A, angle B, angle Epsilon = angle{ 0.0001f });
 
 //]]~~
-
-#include "Angle.inl"

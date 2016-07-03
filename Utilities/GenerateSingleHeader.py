@@ -110,12 +110,6 @@ with OutHeaderFilePath.open("w", newline=NewLine) as OutFile:
     PrintLine("// ====================")
     PrintLine("")
 
-    FileName = Path("Backbone", "Angle.inl")
-    with (CodePath / FileName).open("r") as File:
-      TheLines = TransformLines(File.readlines())
-      PrintIncludeOrigin(FileName)
-      PrintLine(TheLines)
-
     FileName = Path("Backbone", "Path.inl")
     with (CodePath / FileName).open("r") as File:
       TheLines = TransformLines(File.readlines())
@@ -156,6 +150,12 @@ with OutTranslationUnitFilePath.open("w", newline=NewLine) as OutFile:
     PrintLine(TheLines)
 
   FileName = Path("Backbone", "Memory.cpp")
+  with (CodePath / FileName).open("r") as File:
+    TheLines = TransformLines(File.readlines())
+    PrintIncludeOrigin(FileName)
+    PrintLine(TheLines)
+
+  FileName = Path("Backbone", "Angle.cpp")
   with (CodePath / FileName).open("r") as File:
     TheLines = TransformLines(File.readlines())
     PrintIncludeOrigin(FileName)
