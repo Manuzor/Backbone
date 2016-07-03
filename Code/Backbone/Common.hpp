@@ -156,7 +156,7 @@ constexpr T
 IntMaxValue()
 {
   return IntIsSigned<T>() ? (T(1) << (NumBits<T>() - 1)) - T(1)
-                          : T(0);
+                          : T(-1);
 }
 
 template<typename T>
@@ -164,7 +164,7 @@ constexpr T
 IntMinValue()
 {
   return IntIsSigned<T>() ? -(T(1) << (NumBits<T>() - 1))
-                          : (T(1) << NumBits<T>());
+                          : T(0);
 }
 
 template<typename t_type>
