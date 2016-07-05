@@ -72,7 +72,10 @@ AngleBetween(angle A, angle B);
 
 /// Checks whether A and B are nearly equal with the given Epsilon.
 bool
-AreNearlyEqual(angle A, angle B, angle Epsilon = angle{ 0.0001f });
+AreNearlyEqual(angle A, angle B, angle Epsilon = angle{ 1e-4f });
+
+inline bool
+IsNearlyZero(angle A, angle Epsilon = angle{ 1e-4f }) { return AreNearlyEqual(A, angle{ 0 }, Epsilon); }
 
 //
 // Trigonometric Functions
