@@ -76,6 +76,14 @@ constexpr uint64 MB(uint64 Amount) { return KB(Amount) * (uint64)1000; }
 constexpr uint64 GB(uint64 Amount) { return MB(Amount) * (uint64)1000; }
 constexpr uint64 TB(uint64 Amount) { return GB(Amount) * (uint64)1000; }
 
+constexpr uint32 SetBit(uint32 Bits, uint32 Position) { return Bits | (uint32(1) << Position); }
+constexpr uint32 UnsetBit(uint32 Bits, uint32 Position) { return Bits & ~(uint32(1) << Position); }
+constexpr bool IsBitSet(uint32 Bits, uint32 Position) { return !!(Bits & (uint32(1) << Position)); }
+
+constexpr uint64 SetBit(uint64 Bits, uint64 Position) { return Bits | (uint64(1) << Position); }
+constexpr uint64 UnsetBit(uint64 Bits, uint64 Position) { return Bits & ~(uint64(1) << Position); }
+constexpr bool IsBitSet(uint64 Bits, uint64 Position) { return !!(Bits & (uint64(1) << Position)); }
+
 //
 // ================
 //
