@@ -195,7 +195,7 @@ Slice(ElementType* FirstPtr, ElementType* OnePastLastPtr)
     auto A = Reinterpret<size_t>(FirstPtr);
     auto B = Reinterpret<size_t>(OnePastLastPtr);
     auto Delta = Max(A, B) - Min(A, B);
-    Assert(Delta % sizeof(ElementType) == 0);
+    Assert(Delta % SizeOf<ElementType>() == 0);
   });
 
   slice<ElementType> Result;
@@ -400,6 +400,13 @@ bool
 operator !=(slice<ElementTypeA> A, slice<ElementTypeB> B)
 {
   return !(A == B);
+}
+
+template<typename ElementType>
+constexpr size_t
+SliceByteSize(slice<ElementType> S)
+{
+  return S.Num * SizeOf<ElementType>();
 }
 
 //]]~~

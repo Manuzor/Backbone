@@ -161,3 +161,14 @@ TEST_CASE("Slice Searching", "[Slice]")
     REQUIRE( SliceCountUntil(AsConst(Foo), 7) == INVALID_INDEX );
   }
 }
+
+TEST_CASE("Slice Misc", "[Slice]")
+{
+  slice<int> Foo = {};
+  Foo.Num = 42;
+  REQUIRE( SliceByteSize(Foo) == 42 * sizeof(int) );
+
+  slice<void> Bar = {};
+  Bar.Num = 1337;
+  REQUIRE( SliceByteSize(Bar) == 1337 );
+}
