@@ -1,8 +1,5 @@
 #pragma once
 
-// TODO Get rid of this?
-#include <type_traits>
-
 //~~[[
 
 #if !defined(BB_Platform_Windows)
@@ -104,36 +101,50 @@ template<typename t_type, size_t N>
 constexpr size_t
 ArrayCount(t_type(&)[N]) { return N; }
 
-// Used to get the size of a type with support for void where a size of 1 byte is assumed.
-template<typename T> struct non_void { enum { Size = sizeof(T) }; };
-template<>           struct non_void<void>       : non_void<uint8>       { };
-template<>           struct non_void<void const> : non_void<uint8 const> { };
+template<typename T> struct impl_size_of { enum { Value = sizeof(T) }; };
+template<>           struct impl_size_of<void>          : impl_size_of<uint8>          { };
+template<>           struct impl_size_of<void const>    : impl_size_of<uint8 const>    { };
+template<>           struct impl_size_of<void volatile> : impl_size_of<uint8 volatile> { };
+
+/// Get the size of type T in bytes.
+///
+/// Same as sizeof(T) except it works also with 'void' (possibly cv-qualified) where a size of 1 byte is assumed.
+template<typename T>
+constexpr size_t
+SizeOf() { return impl_size_of<T>::Value; }
 
 /// Reinterpretation of the given pointer in case t_pointer_type is `void`.
 template<typename t_pointer_type>
-inline constexpr t_pointer_type*
+constexpr t_pointer_type*
 NonVoidPtr(t_pointer_type* Ptr)
 {
   return Ptr;
 }
 
 /// Reinterpretation of the given pointer in case t_pointer_type is `void`.
-inline constexpr uint8*
+constexpr uint8*
 NonVoidPtr(void* Ptr)
 {
   return reinterpret_cast<uint8*>(Ptr);
 }
 
 /// Reinterpretation of the given pointer in case t_pointer_type is `void`.
-inline constexpr uint8 const*
+constexpr uint8 const*
 NonVoidPtr(void const* Ptr)
 {
   return reinterpret_cast<uint8 const*>(Ptr);
 }
 
+/// Reinterpretation of the given pointer in case t_pointer_type is `void`.
+constexpr uint8 volatile*
+NonVoidPtr(void volatile* Ptr)
+{
+  return reinterpret_cast<uint8 volatile*>(Ptr);
+}
+
 /// Advance the given pointer value by the given amount of bytes.
 template<typename t_pointer_type, typename OffsetType>
-inline constexpr t_pointer_type*
+constexpr t_pointer_type*
 MemAddByteOffset(t_pointer_type* Pointer, OffsetType Offset)
 {
   return reinterpret_cast<t_pointer_type*>((uint8*)Pointer + Offset);
@@ -141,16 +152,28 @@ MemAddByteOffset(t_pointer_type* Pointer, OffsetType Offset)
 
 /// Advance the given pointer value by the given amount times sizeof(t_pointer_type)
 template<typename t_pointer_type, typename OffsetType>
-inline constexpr t_pointer_type*
+constexpr t_pointer_type*
 MemAddOffset(t_pointer_type* Pointer, OffsetType Offset)
 {
-  return MemAddByteOffset(Pointer, Offset * non_void<t_pointer_type>::Size);
+  return MemAddByteOffset(Pointer, Offset * SizeOf<t_pointer_type>());
 }
 
+// TODO: This is MSVC specific right now.
+template<typename T> struct impl_is_pod { static constexpr bool Value = __is_pod(T); };
+template<>           struct impl_is_pod<void>          : public impl_is_pod<uint8>          {};
+template<>           struct impl_is_pod<void const>    : public impl_is_pod<uint8 const>    {};
+template<>           struct impl_is_pod<void volatile> : public impl_is_pod<uint8 volatile> {};
+
+/// Whether the given type T is a "plain old data" (POD) type.
+///
+/// The type 'void' is also considered POD.
 template<typename T>
 constexpr bool
-IsPOD() { return std::is_pod<T>::value; }
+IsPOD() { return impl_is_pod<T>::Value; }
 
+/// Get the number of bits of a given type.
+///
+/// Note: The type 'void' is not supported.
 template<typename T>
 constexpr size_t
 NumBits() { return sizeof(T) * 8; }

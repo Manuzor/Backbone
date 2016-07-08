@@ -38,11 +38,11 @@ struct impl_mem_copy
 };
 
 template<typename T>
-struct impl_mem_copy<T, false>
+struct impl_mem_copy<T, true>
 {
   static constexpr void Do(size_t Num, T* Destination, T const* Source)
   {
-    MemCopyBytes(Num * sizeof(T), Reinterpret<void*>(Destination), Reinterpret<void const*>(Source));
+    MemCopyBytes(Num * SizeOf<T>(), Reinterpret<void*>(Destination), Reinterpret<void const*>(Source));
   }
 };
 
