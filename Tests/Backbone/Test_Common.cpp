@@ -3,6 +3,50 @@
 #include "catch.hpp"
 
 
+TEST_CASE("Defer", "[Common]")
+{
+  SECTION("POD")
+  {
+    int Value = 0;
+
+    Defer [&](){ REQUIRE(Value == 3); };
+    Defer [&](){ ++Value; };
+    Defer [&](){ ++Value; };
+    Defer [=](){ REQUIRE( Value == 0 ); };
+    Defer [&](){ ++Value; };
+  }
+
+  SECTION("Complex capture")
+  {
+    struct foo
+    {
+      int Value = 0;
+      foo() = default;
+      foo(foo const& Other) { FAIL( "Copy constructor is not supposed to be called." ); }
+      ~foo() { REQUIRE( Value == 42 ); }
+    };
+
+    struct bar
+    {
+      int Value = 1337;
+      bar() = default;
+      ~bar() { REQUIRE( Value == 1337 ); }
+    };
+
+    foo Foo;
+    bar Bar;
+
+    Defer [&](){ Foo.Value = 42; Bar = {}; };
+    Defer [Bar](){ REQUIRE( Bar.Value == 1337 ); };
+    Defer [&Bar](){ REQUIRE( Bar.Value == 123 ); };
+    Defer [=, &Foo](){ REQUIRE( Foo.Value == 3 ); REQUIRE( Bar.Value == 1337 ); };
+
+    Foo.Value = 3;
+
+    Bar.Value = 123;
+  }
+}
+
 TEST_CASE("Byte Sizes", "[Common]")
 {
   REQUIRE(KiB(3) == 3 * 1024ULL);
@@ -209,7 +253,7 @@ TEST_CASE("Move", "[Common]")
 {
   SomeDataCounter Counter;
   SomeData::Counter = &Counter;
-  Defer(, SomeData::Counter = nullptr);
+  Defer [](){ SomeData::Counter = nullptr; };
 
   SomeData Something;
   REQUIRE( Counter.DefaultConstructions == 1 );

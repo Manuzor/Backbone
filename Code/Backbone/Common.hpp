@@ -376,14 +376,18 @@ Swap(t_a& A, t_b& B)
   B = Temp;
 }
 
-template<typename t_func_type>
-struct _defer_impl
+struct impl_defer
 {
-  t_func_type Func;
+  template<typename LambdaType>
+  struct helper
+  {
+    LambdaType Lambda;
+    helper(LambdaType InLambda) : Lambda{ Move(InLambda) } {}
+    ~helper() { Lambda(); }
+  };
 
   template<typename t_in_func_type>
-  _defer_impl(t_in_func_type InFunc) : Func{ Move(InFunc) } {};
-  ~_defer_impl() { Func(); }
+  helper<t_in_func_type> operator =(t_in_func_type InLambda) { return { Move(InLambda) }; }
 };
 
 #define PRE_Concat2_Impl(A, B)  A ## B
@@ -391,17 +395,21 @@ struct _defer_impl
 #define PRE_Concat3(A, B, C)    PRE_Concat2(PRE_Concat2(A, B), C)
 #define PRE_Concat4(A, B, C, D) PRE_Concat2(PRE_Concat2(A, B), PRE_Concat2(C, D))
 
-// Usage:
-// int i = 0;
-// Defer(&, printf("Foo %d\n", i); i++ );
-// Defer(&, printf("Bar %d\n", i); i++ );
-//
-// Output:
-// Bar 0
-// Foo 1
-//
-// \param CaptureSpec The lambda capture specification.
-#define Defer(CaptureSpec, ...) auto PRE_Concat2(_DeferFunc, __LINE__) = [CaptureSpec](){ __VA_ARGS__; }; \
-_defer_impl<decltype(PRE_Concat2(_DeferFunc, __LINE__))> PRE_Concat2(_Defer, __LINE__){ PRE_Concat2(_DeferFunc, __LINE__) }
+/// Defers execution of code until the end of the current scope.
+///
+/// Usage:
+/// int i = 0;
+/// Defer [&](){ i++; printf("Foo %d\n", i); };
+/// Defer [&](){ i++; printf("Bar %d\n", i); };
+/// Defer [=](){      printf("Baz %d\n", i); };
+///
+/// Output:
+/// Baz 0
+/// Bar 1
+/// Foo 2
+///
+/// \param CaptureSpec The lambda capture specification.
+//#define Defer(Lambda) impl_defer<decltype(Lambda)> PRE_Concat2(_Defer, __LINE__){ Lambda }
+#define Defer auto PRE_Concat2(_Defer, __LINE__) = impl_defer() =
 
 //]]~~
