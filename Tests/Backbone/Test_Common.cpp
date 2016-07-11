@@ -293,3 +293,27 @@ TEST_CASE("Move", "[Common]")
   REQUIRE( Counter.MoveConstructions    == 1 );
   REQUIRE( Counter.Destructions         == 4 );
 }
+
+struct my_conversion
+{
+  static constexpr int
+  Do(float)
+  {
+    return 42;
+  }
+
+  static constexpr int
+  Do(double)
+  {
+    return 1337;
+  }
+};
+
+template<> struct impl_convert<int, float> : public my_conversion {};
+template<> struct impl_convert<int, double> : public my_conversion {};
+
+TEST_CASE("General Conversion", "[Common]")
+{
+  REQUIRE(Convert<int>(3.1415f) == 42);
+  REQUIRE(Convert<int>(3.1415 ) == 1337);
+}

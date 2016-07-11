@@ -235,8 +235,6 @@ Forward(rm_ref<t_type>&& Argument)
   return static_cast<t_type&&>(Argument);
 }
 
-// TODO(Manu): Add int_trait (platform specific because of DWORD etc.)
-
 template<typename t_dest, typename t_source>
 constexpr t_dest
 Cast(t_source Value)
@@ -274,6 +272,23 @@ t_type const*
 AsPtrToConst(t_type* Value)
 {
   return const_cast<t_type const*>(Value);
+}
+
+template<typename ToType, typename FromType>
+struct impl_convert
+{
+  static constexpr ToType
+  Do(FromType const& Value)
+  {
+    return Cast<ToType>(Value);
+  }
+};
+
+template<typename ToType, typename FromType>
+ToType
+Convert(FromType const& Value)
+{
+  return impl_convert<ToType, FromType>::Do(Value);
 }
 
 /// Asserts on overflows and underflows when converting signed or unsigned
@@ -408,15 +423,15 @@ Swap(t_a& A, t_b& B)
 struct impl_defer
 {
   template<typename LambdaType>
-  struct helper
+  struct defer
   {
     LambdaType Lambda;
-    helper(LambdaType InLambda) : Lambda{ Move(InLambda) } {}
-    ~helper() { Lambda(); }
+    defer(LambdaType InLambda) : Lambda{ Move(InLambda) } {}
+    ~defer() { Lambda(); }
   };
 
   template<typename t_in_func_type>
-  helper<t_in_func_type> operator =(t_in_func_type InLambda) { return { Move(InLambda) }; }
+  defer<t_in_func_type> operator =(t_in_func_type InLambda) { return { Move(InLambda) }; }
 };
 
 #define PRE_Concat2_Impl(A, B)  A ## B
