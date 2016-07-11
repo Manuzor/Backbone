@@ -144,6 +144,14 @@ TEST_CASE("Slice Equality", "[Slice]")
     REQUIRE(Foo != Bar);
     REQUIRE(Foo == Baz);
   }
+
+  SECTION("Same length, different content but same first element")
+  {
+    auto Foo = SliceFromString("ABC");
+    auto Bar = SliceFromString("ABD");
+
+    REQUIRE(Foo != Bar);
+  }
 }
 
 TEST_CASE("Slice Searching", "[Slice]")
