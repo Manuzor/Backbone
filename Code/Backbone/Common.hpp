@@ -354,6 +354,12 @@ constexpr ReturnType
 Pow(BaseType Base, ExponentType Exponent) { return (ReturnType)Pow((double)Base, (double)Exponent); }
 
 double
+Mod(double Value, double Divisor);
+
+float
+Mod(float Value, float Divisor);
+
+double
 Sqrt(double Value);
 
 float
