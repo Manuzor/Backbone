@@ -317,3 +317,27 @@ TEST_CASE("General Conversion", "[Common]")
   REQUIRE(Convert<int>(3.1415f) == 42);
   REQUIRE(Convert<int>(3.1415 ) == 1337);
 }
+
+TEST_CASE("Float UNorm SNorm Conversion", "[Common]")
+{
+  SECTION("uint8")
+  {
+    // Note: We cast to uint32 so the output doesn't get treated as a char but
+    //       as an integer value.
+    REQUIRE( (uint32)FloatToUNorm<uint8>(0.0f)   == 0 );
+    REQUIRE( (uint32)FloatToUNorm<uint8>(1.0f)   == 255 );
+    REQUIRE( (uint32)FloatToUNorm<uint8>(0.5f)   == 128 );
+    REQUIRE( (uint32)FloatToUNorm<uint8>(0.2f)   == 51 );
+    REQUIRE( (uint32)FloatToUNorm<uint8>(0.25f)  == 64 );
+
+    REQUIRE( UNormToFloat(0) == 0.0f );
+    REQUIRE( UNormToFloat(IntMaxValue<uint8>()) == 1.0f );
+    REQUIRE( AreNearlyEqual(UNormToFloat<uint8>(IntMaxValue<uint8>() / 2), 0.5f, 0.005f) );
+
+    //
+    // Test Clamping
+    //
+    REQUIRE( (uint32)FloatToUNorm<uint8>(2.0f)   == 255 );
+    REQUIRE( (uint32)FloatToUNorm<uint8>(-1.0f)  == 0 );
+  }
+}

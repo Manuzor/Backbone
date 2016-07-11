@@ -420,6 +420,22 @@ Swap(t_a& A, t_b& B)
   B = Temp;
 }
 
+/// Maps the given float Value from [0, 1] to [0, MaxValueOf(UNormType)]
+template<typename UNormType>
+UNormType constexpr
+FloatToUNorm(float Value)
+{
+  return Cast<UNormType>(Clamp((Value * IntMaxValue<UNormType>()) + 0.5f, 0.0f, IntMaxValue<UNormType>()));
+}
+
+/// Maps the given unsigned byte Value from [0, 255] to [0, 1]
+template<typename UNormType>
+float constexpr
+UNormToFloat(UNormType Value)
+{
+  return Clamp(Cast<float>(Value) / IntMaxValue<UNormType>(), 0.0f, 1.0f);
+}
+
 struct impl_defer
 {
   template<typename LambdaType>
