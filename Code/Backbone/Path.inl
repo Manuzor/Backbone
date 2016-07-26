@@ -57,4 +57,37 @@ auto
   return Result;
 }
 
+template<typename CharType>
+struct impl_find_file_extension
+{
+  static slice<CharType>
+  Do(slice<CharType> FileName, path_options Options)
+  {
+    for(size_t Index = FileName.Num; Index > 0; --Index)
+    {
+      if(FileName[Index] == '.')
+        return Slice(FileName, Index, FileName.Num);
+
+      if(FileName[Index] == Options.Separator)
+        break;
+    }
+
+    return { 0, OnePastLast(FileName) };
+  }
+};
+
+auto
+::FindFileExtension(slice<char> FileName, path_options Options)
+  -> slice<char>
+{
+  return impl_find_file_extension<char>::Do(FileName, Options);
+}
+
+auto
+::FindFileExtension(slice<char const> FileName, path_options Options)
+  -> slice<char const>
+{
+  return impl_find_file_extension<char const>::Do(FileName, Options);
+}
+
 //]]~~

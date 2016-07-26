@@ -17,3 +17,29 @@ TEST_CASE("Concat Paths", "[Path]")
     REQUIRE(Result == SliceFromString("head\\tail"));
   }
 }
+
+TEST_CASE("Find File Extension", "[Path]")
+{
+  SECTION("Empty Slice")
+  {
+    auto Result = FindFileExtension(slice<char>{});
+    REQUIRE( Result.Num == 0 );
+    REQUIRE( Result.Ptr == nullptr );
+  }
+
+  SECTION("Empty String")
+  {
+    auto EmptyString = SliceFromString("");
+    auto Result = FindFileExtension(EmptyString);
+    REQUIRE( Result.Num == 0 );
+    REQUIRE( Result.Ptr == EmptyString.Ptr );
+  }
+
+  SECTION("Real Example")
+  {
+    auto FileName = SliceFromString("Foo/Bar.Baz");
+    auto Result = FindFileExtension(FileName);
+    REQUIRE( Result.Num == 4 );
+    REQUIRE( Result.Ptr == FileName.Ptr + 7 );
+  }
+}

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Common.hpp"
+#include "Memory.hpp"
 #include <new>
 
 //~~[[
@@ -243,6 +244,28 @@ Slice(slice<ElementType> SomeSlice, StartIndexType InclusiveStartIndex, EndIndex
   return Result;
 }
 
+/// Creates a new slice from an existing one, trimming elements at the beginning.
+template<typename ElementType, typename AmountType>
+constexpr slice<ElementType>
+SliceTrimFront(slice<ElementType> SomeSlice, AmountType Amount)
+{
+  return {
+    Amount > SomeSlice.Num ? 0 : SomeSlice.Num - Amount,
+    MemAddOffset(SomeSlice.Ptr, Amount)
+  };
+}
+
+/// Creates a new slice from an existing one, trimming elements at the beginning.
+template<typename ElementType, typename AmountType>
+constexpr slice<ElementType>
+SliceTrimBack(slice<ElementType> SomeSlice, AmountType Amount)
+{
+  return {
+    Amount > SomeSlice.Num ? 0 : SomeSlice.Num - Amount,
+    SomeSlice.Ptr
+  };
+}
+
 /// Copies the contents of one slice into another.
 ///
 /// If the number of elements don't match, the minimum of both is used.
@@ -250,14 +273,17 @@ template<typename T>
 size_t
 SliceCopy(slice<T> Target, slice<T const> Source)
 {
-  // TODO Optimize for PODs
-
   size_t Amount = Min(Target.Num, Source.Num);
-  for(size_t Index = 0; Index < Amount; ++Index)
-  {
-    Target.Ptr[Index] = Source.Ptr[Index];
-  }
+  MemCopy(Amount, Target.Ptr, Source.Ptr);
   return Amount;
+}
+
+/// Set each element of Target to Value.
+template<typename T>
+void
+SliceSet(slice<T> Target, T const Value)
+{
+  MemSet(Target.Num, Target.Ptr, Forward<T const>(Value));
 }
 
 template<typename T>
