@@ -19,7 +19,8 @@ struct slice
   /// Test whether this slice is valid or not.
   ///
   /// A slice is considered valid if it does not point to null and contains at
-  /// least one element.
+  /// least one element. If `Num` is 0 or `Ptr` is `nullptr`, the slice is
+  /// considered invalid (`false`).
   operator bool() const { return Num && Ptr; }
 
   /// Index operator to access elements of the slice.
@@ -74,7 +75,7 @@ template<typename T>
 typename slice<T>::element_type*
 Last(slice<T> const& SomeSlice)
 {
-  return MemAddOffset(First(SomeSlice), Max(1, SomeSlice.Num) - 1);
+  return MemAddOffset(First(SomeSlice), Max(size_t(1), SomeSlice.Num) - 1);
 }
 
 template<typename T>
@@ -105,7 +106,7 @@ slice<TargetType>
 SliceReinterpret(slice<SourceType> SomeSlice)
 {
   return Slice(Reinterpret<TargetType*>(First(SomeSlice)),
-              Reinterpret<TargetType*>(OnePastLast(SomeSlice)));
+               Reinterpret<TargetType*>(OnePastLast(SomeSlice)));
 }
 
 template<typename SourceType>
