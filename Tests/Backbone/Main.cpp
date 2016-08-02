@@ -6,3 +6,4 @@
 #include <Backbone/Slice.cpp>
 #include <Backbone/Memory.cpp>
 #include <Backbone/Angle.cpp>
+#include <Backbone/StringConversion.cpp>

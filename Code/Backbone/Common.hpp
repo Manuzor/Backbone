@@ -1,5 +1,8 @@
 #pragma once
 
+// TODO: Get rid of this?
+#include <limits>
+
 //~~[[
 
 #if !defined(BB_Platform_Windows)
@@ -239,20 +242,79 @@ IntMinValue()
                           : T(0);
 }
 
-template<typename t_type>
-struct impl_rm_ref
+template<typename CharType> struct impl_is_digit_helper { static constexpr bool Do(CharType Char) { return Char >= '0' && Char <= '9'; } };
+template<typename CharType> struct impl_is_digit;
+template<> struct impl_is_digit<char> : public impl_is_digit_helper<char> {};
+
+template<typename CharType>
+constexpr bool
+IsDigit(CharType Char)
 {
-  using Result = t_type;
+  return impl_is_digit<rm_ref_const<CharType>>::Do(Char);
+}
+
+template<typename CharType>
+struct impl_is_whitespace_helper
+{
+  static constexpr bool
+  Do(CharType Char)
+  {
+    return Char == ' '  ||
+           Char == '\n' ||
+           Char == '\r' ||
+           Char == '\t' ||
+           Char == '\b';
+  }
 };
 
-template<typename t_type>
-struct impl_rm_ref<t_type&>
-{
-  using Result = t_type;
-};
+template<typename CharType> struct impl_is_whitespace;
+template<> struct impl_is_whitespace<char> : public impl_is_whitespace_helper<char> {};
 
-template<typename t_type>
-using rm_ref = typename impl_rm_ref<t_type>::Result;
+template<typename CharType>
+constexpr bool
+IsWhitespace(CharType Char)
+{
+  return impl_is_whitespace<rm_ref_const<CharType>>::Do(Char);
+}
+
+template<typename T> struct impl_nan;
+// TODO: Cross-platform.
+template<> struct impl_nan<float>  { static constexpr float  Value = std::numeric_limits<float>::quiet_NaN(); };
+template<> struct impl_nan<double> { static constexpr double Value = std::numeric_limits<double>::quiet_NaN(); };
+
+/// Returns a quiet Not-A-Number value of the given type.
+template<typename T>
+constexpr T
+NaN()
+{
+  return impl_nan<T>::Value;
+}
+
+template<typename T> struct impl_is_nan;
+template<> struct impl_is_nan<float>  { static constexpr bool Do(float  Value) { return Value != Value; } };
+template<> struct impl_is_nan<double> { static constexpr bool Do(double Value) { return Value != Value; } };
+
+template<typename T>
+constexpr bool
+IsNaN(T Value)
+{
+  return impl_is_nan<T>::Do(Value);
+}
+
+template<typename T> struct impl_rm_ref     { using Type = T; };
+template<typename T> struct impl_rm_ref<T&> { using Type = T; };
+
+template<typename T>
+using rm_ref = typename impl_rm_ref<T>::Type;
+
+template<typename T> struct impl_rm_const          { using Type = T; };
+template<typename T> struct impl_rm_const<T const> { using Type = T; };
+
+template<typename T>
+using rm_const = typename impl_rm_const<T>::Type;
+
+template<typename T>
+using rm_ref_const = rm_const<rm_ref<T>>;
 
 template<class t_type>
 constexpr typename rm_ref<t_type>&&
@@ -325,11 +387,14 @@ struct impl_convert
   }
 };
 
-template<typename ToType, typename FromType>
+template<typename ToType, typename FromType, typename... ExtraTypes>
 ToType
-Convert(FromType const& Value)
+Convert(FromType const& From, ExtraTypes&&... Extra)
 {
-  return impl_convert<ToType, FromType>::Do(Value);
+  using UnqualifiedToType   = rm_ref_const<ToType>;
+  using UnqualifiedFromType = rm_ref_const<FromType>;
+  using Impl = impl_convert<UnqualifiedToType, UnqualifiedFromType>;
+  return Impl::Do(From, Forward<ExtraTypes>(Extra)...);
 }
 
 /// Asserts on overflows and underflows when converting signed or unsigned
@@ -427,6 +492,26 @@ Sqrt(T Value) { return (ReturnType)Sqrt((double)Value); }
 
 float
 InvSqrt(float Value);
+
+
+template<typename NumberType> struct impl_negate;
+template<> struct impl_negate<float>  { static constexpr float  Do(float  Value) { return -Value; } };
+template<> struct impl_negate<double> { static constexpr double Do(double Value) { return -Value; } };
+template<> struct impl_negate<int8>   { static constexpr int8   Do(int8  Value)  { return -Value; } };
+template<> struct impl_negate<int16>  { static constexpr int16  Do(int16 Value)  { return -Value; } };
+template<> struct impl_negate<int32>  { static constexpr int32  Do(int32 Value)  { return -Value; } };
+template<> struct impl_negate<int64>  { static constexpr int64  Do(int64 Value)  { return -Value; } };
+template<> struct impl_negate<uint8>  { static constexpr uint8  Do(uint8  Value) { return  Value; } };
+template<> struct impl_negate<uint16> { static constexpr uint16 Do(uint16 Value) { return  Value; } };
+template<> struct impl_negate<uint32> { static constexpr uint32 Do(uint32 Value) { return  Value; } };
+template<> struct impl_negate<uint64> { static constexpr uint64 Do(uint64 Value) { return  Value; } };
+
+template<typename NumberType>
+NumberType
+Negate(NumberType Value)
+{
+  return impl_negate<NumberType>::Do(Value);
+}
 
 // Project a value from [LowerBound, UpperBound] to [0, 1]
 // Example:

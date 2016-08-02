@@ -64,6 +64,9 @@ with OutHeaderFilePath.open("w", newline=NewLine) as OutFile:
 // For placement-new.
 #include <new>
 
+// For std::numeric_limits
+#include <limits>
+
 """)
 
   FileName = Path("Backbone", "Common.hpp")
@@ -97,6 +100,12 @@ with OutHeaderFilePath.open("w", newline=NewLine) as OutFile:
     PrintLine(TheLines)
 
   FileName = Path("Backbone", "FixedBlock.hpp")
+  with (CodePath / FileName).open("r") as File:
+    TheLines = TransformLines(File.readlines())
+    PrintIncludeOrigin(FileName)
+    PrintLine(TheLines)
+
+  FileName = Path("Backbone", "StringConversion.hpp")
   with (CodePath / FileName).open("r") as File:
     TheLines = TransformLines(File.readlines())
     PrintIncludeOrigin(FileName)
@@ -156,6 +165,12 @@ with OutTranslationUnitFilePath.open("w", newline=NewLine) as OutFile:
     PrintLine(TheLines)
 
   FileName = Path("Backbone", "Angle.cpp")
+  with (CodePath / FileName).open("r") as File:
+    TheLines = TransformLines(File.readlines())
+    PrintIncludeOrigin(FileName)
+    PrintLine(TheLines)
+
+  FileName = Path("Backbone", "StringConversion.cpp")
   with (CodePath / FileName).open("r") as File:
     TheLines = TransformLines(File.readlines())
     PrintIncludeOrigin(FileName)
