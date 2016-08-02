@@ -90,6 +90,9 @@ Cos(angle Angle);
 float
 Tan(angle Angle);
 
+inline float
+Cot(angle Angle) { return 1 / Tan(Angle); }
+
 angle
 ASin(float A);
 
