@@ -611,18 +611,27 @@ struct impl_defer
 /// Defers execution of code until the end of the current scope.
 ///
 /// Usage:
-/// int i = 0;
-/// Defer [&](){ i++; printf("Foo %d\n", i); };
-/// Defer [&](){ i++; printf("Bar %d\n", i); };
-/// Defer [=](){      printf("Baz %d\n", i); };
+///   int i = 0;
+///   Defer [&](){ i++; printf("Foo %d\n", i); };
+///   Defer [&](){ i++; printf("Bar %d\n", i); };
+///   Defer [=](){      printf("Baz %d\n", i); };
 ///
 /// Output:
-/// Baz 0
-/// Bar 1
-/// Foo 2
+///   Baz 0
+///   Bar 1
+///   Foo 2
 ///
 /// \param CaptureSpec The lambda capture specification.
 //#define Defer(Lambda) impl_defer<decltype(Lambda)> PRE_Concat2(_Defer, __LINE__){ Lambda }
 #define Defer auto PRE_Concat2(_Defer, __LINE__) = impl_defer() =
+
+
+/// Helper macro to define an opaque handle type.
+///
+/// Usage:
+///   DefineOpaqueHandle(Foo);
+///   /*...*/
+///   Foo CreateFoo(); // Returns a Foo.
+#define DefineOpaqueHandle(Name) using Name = struct Name ## _OPAQUE*
 
 //]]~~

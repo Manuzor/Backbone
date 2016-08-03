@@ -229,6 +229,11 @@ SliceFromString(char const* StringPtr);
 slice<char>
 SliceFromString(char* StringPtr);
 
+/// Custom string literal suffix.
+/// Usage: slice<char const> Foo = "Foo"_S;
+inline slice<char const>
+operator "" _S(char const* StringPtr, size_t Num) { return Slice(Num, StringPtr); }
+
 /// Creates a new slice from an existing slice.
 ///
 /// \param InclusiveStartIndex The index to start slicing from.
@@ -335,7 +340,7 @@ SliceDestruct(slice<T> Target)
 
 template<typename T, typename NeedleType>
 size_t
-SliceCountUntil(slice<T const> Haystack, const NeedleType& Needle)
+SliceCountUntil(slice<T const> Haystack, NeedleType const& Needle)
 {
   size_t Index = 0;
 
@@ -352,7 +357,7 @@ SliceCountUntil(slice<T const> Haystack, const NeedleType& Needle)
 /// Counts up until \c Predicate(ElementOfHaystack, Needle) returns \c true.
 template<typename T, typename NeedleType, typename PredicateType>
 size_t
-SliceCountUntil(slice<T const> Haystack, const NeedleType& Needle, PredicateType Predicate)
+SliceCountUntil(slice<T const> Haystack, NeedleType const& Needle, PredicateType Predicate)
 {
   size_t Index = 0;
 
@@ -364,6 +369,63 @@ SliceCountUntil(slice<T const> Haystack, const NeedleType& Needle, PredicateType
   }
 
   return INVALID_INDEX;
+}
+
+template<typename T, typename U>
+bool
+SliceStartsWith(slice<T const> Slice, slice<U const> Sequence)
+{
+  size_t const Amount = Min(Slice.Num, Sequence.Num);
+
+  for(size_t Index = 0; Index < Amount; ++Index)
+  {
+    if(Slice[Index] != Sequence[Index])
+      return false;
+  }
+
+  return true;
+}
+
+template<typename T, typename NeedleType>
+slice<T>
+SliceFind(slice<T> Haystack, NeedleType const& Needle)
+{
+  while(Haystack.Num)
+  {
+    if(Haystack[0] == Needle)
+      return Haystack;
+    Haystack = SliceTrimFront(Haystack, 1);
+  }
+
+  return Haystack;
+}
+
+template<typename T, typename NeedleType, typename PredicateType>
+slice<T>
+SliceFind(slice<T> Haystack, NeedleType const& Needle, PredicateType Predicate)
+{
+  while(Haystack.Num)
+  {
+    if(Predicate(Haystack[0], Needle))
+      return Haystack;
+    Haystack = SliceTrimFront(Haystack, 1);
+  }
+
+  return Haystack;
+}
+
+template<typename T, typename NeedleType>
+slice<T>
+SliceFind(slice<T> Haystack, slice<NeedleType> const& NeedleSequence)
+{
+  while(Haystack.Num)
+  {
+    if(SliceStartsWith(Haystack, NeedleSequence))
+      return Haystack;
+    Haystack = SliceTrimFront(Haystack, 1);
+  }
+
+  return Haystack;
 }
 
 
