@@ -1,5 +1,6 @@
 #include <Backbone/StringConversion.hpp>
 #include <Backbone/Common.hpp>
+#include <Backbone/FixedBlock.hpp>
 
 #include "catch.hpp"
 
@@ -83,4 +84,12 @@ TEST_CASE("String Conversion: String -> Integer", "[StringConversion]")
   REQUIRE( !Success );
   REQUIRE( Value == 0 );
   REQUIRE( String.Num == 3 );
+}
+
+TEST_CASE("String Conversion: Integer -> String", "[StringConversion]")
+{
+  fixed_block<32, char> FixedBuffer;
+  auto Buffer = Slice(FixedBuffer);
+  slice<char> Value = Convert<slice<char>>(int(42), Buffer);
+  REQUIRE( Value == "42"_S );
 }
