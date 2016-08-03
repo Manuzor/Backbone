@@ -256,6 +256,16 @@ template<typename IntegerType>
 slice<char>
 ImplConvertIntegerToStringHelper(IntegerType Integer, slice<char> Buffer, bool* Success)
 {
+  if(Integer == 0)
+  {
+    Buffer[0] = '0';
+
+    if(Success)
+      *Success = true;
+
+    return Slice(Buffer, 0, 1);
+  }
+
   size_t NumChars = 0;
 
   if(Integer < 0)
@@ -277,6 +287,9 @@ ImplConvertIntegerToStringHelper(IntegerType Integer, slice<char> Buffer, bool* 
 
   // Result now contains the digits in reverse order, so we swap them around.
   SliceReverseElements(Result);
+
+  if(Success)
+    *Success = true;
 
   return Result;
 }

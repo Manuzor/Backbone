@@ -90,6 +90,14 @@ TEST_CASE("String Conversion: Integer -> String", "[StringConversion]")
 {
   fixed_block<32, char> FixedBuffer;
   auto Buffer = Slice(FixedBuffer);
-  slice<char> Value = Convert<slice<char>>(int(42), Buffer);
+  bool Success = false;
+  slice<char> Value;
+
+  Value = Convert<slice<char>>(int(42), Buffer, &Success);
+  REQUIRE( Success );
   REQUIRE( Value == "42"_S );
+
+  Value = Convert<slice<char>>(int(0), Buffer, &Success);
+  REQUIRE( Success );
+  REQUIRE( Value == "0"_S );
 }
