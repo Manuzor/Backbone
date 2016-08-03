@@ -428,6 +428,18 @@ SliceFind(slice<T> Haystack, slice<NeedleType> const& NeedleSequence)
   return Haystack;
 }
 
+template<typename T>
+void
+SliceReverseElements(slice<T> SomeSlice)
+{
+  auto const NumSwaps = SomeSlice.Num / 2;
+  for(size_t FrontIndex = 0; FrontIndex < NumSwaps; ++FrontIndex)
+  {
+    auto const BackIndex = SomeSlice.Num - FrontIndex - 1;
+    Swap(SomeSlice[FrontIndex], SomeSlice[BackIndex]);
+  }
+}
+
 
 /// Compares the contents of the two slices for equality.
 ///
