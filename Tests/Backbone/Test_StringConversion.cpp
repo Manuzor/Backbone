@@ -6,6 +6,10 @@
 static void
 TestFloat(char const* String, double ExpectedValue, int ExpectedRemainingNumStringElements)
 {
+  CAPTURE( String );
+  CAPTURE( ExpectedValue );
+  CAPTURE( ExpectedRemainingNumStringElements );
+
   auto Source = SliceFromString(String);
   bool Success{};
   double ConvertedValue = Convert<double>(&Source, &Success);
@@ -50,6 +54,10 @@ TEST_CASE("String Conversion: String -> Floating Point", "[StringConversion]")
 static void
 TestInt(char const* String, int64 ExpectedValue, int ExpectedRemainingNumStringElements)
 {
+  CAPTURE( String );
+  CAPTURE( ExpectedValue );
+  CAPTURE( ExpectedRemainingNumStringElements );
+
   auto Source = SliceFromString(String);
   bool Success{};
   int64 ConvertedValue = Convert<int64>(&Source, &Success);
@@ -73,6 +81,6 @@ TEST_CASE("String Conversion: String -> Integer", "[StringConversion]")
   bool Success{};
   int64 Value = Convert<int64>(&String, &Success);
   REQUIRE( !Success );
-  REQUIRE( Value == IntMaxValue<int64>() );
+  REQUIRE( Value == 0 );
   REQUIRE( String.Num == 3 );
 }

@@ -73,6 +73,28 @@ TEST_CASE("Slice creation", "[Slice]")
     REQUIRE(Bar.Num == ArrayCount(CharArray) - 1);
     REQUIRE(Bar.Ptr == String);
   }
+
+  SECTION("From two indices")
+  {
+    int DataArray[]{ 0, 1, 2 };
+    auto Data = Slice(DataArray);
+
+    auto Foo = Slice(Data, 0, 0);
+    REQUIRE( Foo.Num == 0 );
+    REQUIRE( Foo.Ptr == Data.Ptr );
+
+    auto Bar = Slice(Data, 0, 1);
+    REQUIRE( Bar.Num == 1 );
+    REQUIRE( Bar.Ptr == Data.Ptr );
+
+    auto Baz = Slice(Bar, 0, 1);
+    REQUIRE( Baz.Num == 1 );
+    REQUIRE( Baz.Ptr == Data.Ptr );
+
+    auto Baar = Slice(Data, 1, 3);
+    REQUIRE( Baar.Num == 2 );
+    REQUIRE( Baar.Ptr == Data.Ptr + 1 );
+  }
 }
 
 TEST_CASE("Slice implicit bool conversion", "[Slice]")

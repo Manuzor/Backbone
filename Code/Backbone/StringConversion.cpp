@@ -183,11 +183,11 @@ ImplConvertStringToIntegerHelper(slice<char const>* Source, bool* Success, Integ
   switch(String[0])
   {
   case '+':
-    String = Slice(String, 0, 1);
+    String = SliceTrimFront(String, 1);
     break;
   case '-':
     Sign = true;
-    String = Slice(String, 0, 1);
+    String = SliceTrimFront(String, 1);
     break;
   default:
     break;
@@ -201,7 +201,7 @@ ImplConvertStringToIntegerHelper(slice<char const>* Source, bool* Success, Integ
     NumericalPart *= 10;
     NumericalPart += String[0] - '0';
     HasNumericalPart = true;
-    String = Slice(String, 0, 1);
+    String = SliceTrimFront(String, 1);
   }
 
   if (!HasNumericalPart)
@@ -234,6 +234,7 @@ ImplConvertStringToIntegerHelper(slice<char const>* Source, bool* Success, Integ
   if(Success)
     *Success = true;
 
+  *Source = String;
   return Value;
 }
 
