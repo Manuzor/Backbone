@@ -41,5 +41,10 @@ TEST_CASE("Find File Extension", "[Path]")
     auto Result = FindFileExtension(FileName);
     REQUIRE( Result.Num == 4 );
     REQUIRE( Result.Ptr == FileName.Ptr + 7 );
+
+    FileName = SliceFromString("Foo\\Bar.Baz");
+    Result = FindFileExtension(FileName);
+    REQUIRE( Result.Num == 4 );
+    REQUIRE( Result.Ptr == FileName.Ptr + 7 );
   }
 }

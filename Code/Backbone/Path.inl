@@ -63,19 +63,21 @@ struct impl_find_file_extension
   static slice<CharType>
   Do(slice<CharType> FileName, path_options Options)
   {
-    while(FileName.Num)
+    auto Seek = OnePastLast(FileName);
+    size_t Num = 0;
+    while(Num < FileName.Num)
     {
-      --FileName.Num;
-      ++FileName.Ptr;
+      ++Num;
+      --Seek;
 
-      char const Character = *First(FileName);
+      auto const Character = *Seek;
 
       // Found the path separator before the extension marker?
       if(Character == Options.Separator)
         break;
 
       if(Character == '.')
-        return FileName;
+        return Slice(Num, Seek);
     }
 
     // Return an empty slice that still points to the correct memory.
