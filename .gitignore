@@ -2,3 +2,5 @@
 /Build/
 *.sublime-workspace
 *.fdb
+
+__pycache__
