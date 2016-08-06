@@ -23,6 +23,9 @@ struct slice
   /// considered invalid (`false`).
   operator bool() const { return Num && Ptr; }
 
+  /// Implicit conversion to const version.
+  operator slice<ElementType const>() const { return { Num, Ptr }; }
+
   /// Index operator to access elements of the slice.
   template<typename IndexType>
   auto
@@ -32,21 +35,6 @@ struct slice
     BoundsCheck(Index >= 0 && Index < Num);
     return Ptr[Index];
   }
-};
-
-template<>
-struct slice<void>
-{
-  using element_type = void;
-
-  size_t Num;
-  element_type* Ptr;
-
-  /// Test whether this slice is valid or not.
-  ///
-  /// A slice is considered valid if it does not point to null and contains at
-  /// least one element.
-  operator bool() const { return Num && Ptr; }
 };
 
 template<>
@@ -62,6 +50,24 @@ struct slice<void const>
   /// A slice is considered valid if it does not point to null and contains at
   /// least one element.
   operator bool() const { return Num && Ptr; }
+};
+
+template<>
+struct slice<void>
+{
+  using element_type = void;
+
+  size_t Num;
+  element_type* Ptr;
+
+  /// Test whether this slice is valid or not.
+  ///
+  /// A slice is considered valid if it does not point to null and contains at
+  /// least one element.
+  operator bool() const { return Num && Ptr; }
+
+  /// Implicit conversion to const version.
+  operator slice<void const>() const { return { Num, Ptr }; }
 };
 
 template<typename T>
