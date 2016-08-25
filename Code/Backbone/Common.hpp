@@ -103,6 +103,35 @@ DefineArrayTypes(uint16);
 DefineArrayTypes(uint32);
 DefineArrayTypes(uint64);
 
+
+//
+// ================
+//
+
+/// Used to generate compile-time errors when the same name prefix is used in
+/// different locations.
+///
+/// Usage:
+/// \code
+/// RESERVE_PREFIX(Mem);
+///
+/// // Use the "Mem" prefix here without having to worry too much about others
+/// // using the same prefix.
+// / void MemCopy( /* ... */ ) { /* ... */ }
+///
+/// // By convention, this should also be safe.
+/// struct mem_thing { /* ... */ };
+///
+/// // The following would trigger a compile-time error.
+/// // RESERVE_PREFIX(Mem);
+///
+/// \endcode
+///
+/// Note that this is not a fool-proof system, it's just a tool to help you
+/// keep your code clean.
+#define RESERVE_PREFIX(Prefix) struct reserved_prefix_##Prefix {}
+
+
 //
 // ================
 //
@@ -125,6 +154,7 @@ constexpr uint64 SetBit(uint64 Bits, uint64 Position) { return Bits | (uint64(1)
 constexpr uint64 UnsetBit(uint64 Bits, uint64 Position) { return Bits & ~(uint64(1) << Position); }
 constexpr bool IsBitSet(uint64 Bits, uint64 Position) { return !!(Bits & (uint64(1) << Position)); }
 
+
 //
 // ================
 //
@@ -136,6 +166,7 @@ Pi() { return (T)3.14159265359; }
 template<typename T = float>
 constexpr T
 E() { return (T)2.71828182845; }
+
 
 //
 // ================

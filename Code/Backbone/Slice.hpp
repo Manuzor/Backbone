@@ -6,6 +6,8 @@
 
 //~~[[
 
+RESERVE_PREFIX(Slice);
+
 constexpr size_t INVALID_INDEX = (size_t)-1;
 
 template<typename ElementType>
@@ -21,14 +23,14 @@ struct slice
   /// A slice is considered valid if it does not point to null and contains at
   /// least one element. If `Num` is 0 or `Ptr` is `nullptr`, the slice is
   /// considered invalid (`false`).
-  operator bool() const { return Num && Ptr; }
+  inline operator bool() const { return Num && Ptr; }
 
   /// Implicit conversion to const version.
-  operator slice<ElementType const>() const { return { Num, Ptr }; }
+  inline operator slice<ElementType const>() const { return { Num, Ptr }; }
 
   /// Index operator to access elements of the slice.
   template<typename IndexType>
-  auto
+  inline auto
   operator[](IndexType Index) const
     -> decltype(Ptr[Index])
   {
@@ -49,7 +51,7 @@ struct slice<void const>
   ///
   /// A slice is considered valid if it does not point to null and contains at
   /// least one element.
-  operator bool() const { return Num && Ptr; }
+  inline operator bool() const { return Num && Ptr; }
 };
 
 template<>
@@ -64,10 +66,10 @@ struct slice<void>
   ///
   /// A slice is considered valid if it does not point to null and contains at
   /// least one element.
-  operator bool() const { return Num && Ptr; }
+  inline operator bool() const { return Num && Ptr; }
 
   /// Implicit conversion to const version.
-  operator slice<void const>() const { return { Num, Ptr }; }
+  inline operator slice<void const>() const { return { Num, Ptr }; }
 };
 
 template<typename T>
@@ -154,7 +156,6 @@ constexpr slice<ElementType>
 SliceUnion(slice<ElementType> SliceA, slice<ElementType> SliceB)
 {
   // A union only makes sense when both slices are overlapping.
-  Assert(SlicesAreOverlapping(SliceA, SliceB));
   return { Min(First(SliceA), First(SliceB)), Max(OnePastLast(SliceA), OnePastLast(SliceB)) };
 }
 
@@ -278,70 +279,61 @@ SliceTrimBack(slice<ElementType> SomeSlice, AmountType Amount)
   };
 }
 
-/// Copies the contents of one slice into another.
-///
-/// If the number of elements don't match, the minimum of both is used.
-template<typename T>
-size_t
-SliceCopy(slice<T> Target, slice<T const> Source)
+template<typename T, typename... ArgTypes>
+inline void
+SliceConstruct(slice<T> Destination, ArgTypes&&... Args)
 {
-  size_t Amount = Min(Target.Num, Source.Num);
-  MemCopy(Amount, Target.Ptr, Source.Ptr);
-  return Amount;
-}
-
-/// Set each element of Target to Value.
-template<typename T>
-void
-SliceSet(slice<T> Target, T const Value)
-{
-  MemSet(Target.Num, Target.Ptr, Forward<T const>(Value));
+  MemConstruct(Destination.Num, Destination.Ptr, Forward<ArgTypes>(Args)...);
 }
 
 template<typename T>
-size_t
-SliceMove(slice<T> Target, slice<T const> Source)
+inline void
+SliceDestruct(slice<T> Destination)
 {
-  // TODO Optimize for PODs
+  MemDestruct(Destination.Num, Destination.Ptr);
+}
 
-  size_t Amount = Min(Target.Num, Source.Num);
-  for(size_t Index = 0; Index < Amount; ++Index)
-  {
-    Target.Ptr[Index] = Move(Source.Ptr[Index]);
-  }
+template<typename T>
+inline size_t
+SliceCopy(slice<T> Destination, slice<T const> Source)
+{
+  size_t const Amount = Min(Destination.Num, Source.Num);
+  MemCopy(Amount, Destination.Ptr, Source.Ptr);
   return Amount;
 }
 
 template<typename T>
-void
-SliceDefaultConstruct(slice<T> Target)
+inline size_t
+SliceCopyConstruct(slice<T> Destination, slice<T const> Source)
 {
-  MemDefaultConstruct(Target.Num, Target.Ptr);
-}
-
-template<typename T>
-size_t
-SliceCopyConstruct(slice<T> Target, slice<T const> Source)
-{
-  size_t Amount = Min(Target.Num, Source.Num);
-  MemCopy(Amount, Target.Ptr, SourcePtr);
+  size_t const Amount = Min(Destination.Num, Source.Num);
+  MemCopyConstruct(Amount, Destination.Ptr, Source.Ptr);
   return Amount;
 }
 
 template<typename T>
-size_t
-SliceMoveConstruct(slice<T> Target, slice<T const> Source)
+inline size_t
+SliceMove(slice<T> Destination, slice<T> Source)
 {
-  size_t Amount = Min(Target.Num, Source.Num);
-  MemMove(Amount, Target.Ptr, SourcePtr);
+  size_t const Amount = Min(Destination.Num, Source.Num);
+  MemMove(Amount, Destination.Ptr, Source.Ptr);
   return Amount;
 }
 
 template<typename T>
-void
-SliceDestruct(slice<T> Target)
+inline size_t
+SliceMoveConstruct(slice<T> Destination, slice<T> Source)
 {
-  MemDestruct(Target.Num, Target.Ptr);
+  size_t const Amount = Min(Destination.Num, Source.Num);
+  MemMoveConstruct(Amount, Destination.Ptr, Source.Ptr);
+  return Amount;
+}
+
+template<typename T, typename U>
+inline void
+SliceSet(slice<T> Destination, U&& Item)
+{
+  MemSet(Destination.Num, Destination.Ptr, Forward<U>(Item));
 }
 
 template<typename T, typename NeedleType>
