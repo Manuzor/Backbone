@@ -152,19 +152,6 @@ TEST_CASE("AsConst", "[Common]")
   REQUIRE(casts::helper(AsPtrToConst(&Data)) == 512);
 }
 
-TEST_CASE("Sign", "[Common]")
-{
-  REQUIRE(Sign(   0) == 0);
-  REQUIRE(Sign( 0.0) == 0.0);
-  REQUIRE(Sign(0.0f) == 0.0f);
-
-  REQUIRE(Sign( 1.0f) ==  1.0f);
-  REQUIRE(Sign(-1.0f) == -1.0f);
-
-  REQUIRE(Sign(uint(42))  == 1);
-  REQUIRE(Sign(uint(-42)) == 1); // Underflow.
-}
-
 TEST_CASE("Min", "[Common]")
 {
   REQUIRE(Min( 0,  1) == 0);
@@ -298,26 +285,29 @@ TEST_CASE("Move", "[Common]")
 
 struct my_conversion
 {
+  struct foo {};
+  struct bar {};
+
   static constexpr int
-  Do(float)
+  Do(foo)
   {
     return 42;
   }
 
   static constexpr int
-  Do(double)
+  Do(bar)
   {
     return 1337;
   }
 };
 
-template<> struct impl_convert<int, float> : public my_conversion {};
-template<> struct impl_convert<int, double> : public my_conversion {};
+template<> struct impl_convert<int, my_conversion::foo> : public my_conversion {};
+template<> struct impl_convert<int, my_conversion::bar> : public my_conversion {};
 
 TEST_CASE("General Conversion", "[Common]")
 {
-  REQUIRE(Convert<int>(3.1415f) == 42);
-  REQUIRE(Convert<int>(3.1415 ) == 1337);
+  REQUIRE(Convert<int>(my_conversion::foo()) == 42);
+  REQUIRE(Convert<int>(my_conversion::bar()) == 1337);
 }
 
 TEST_CASE("Float UNorm SNorm Conversion", "[Common]")
@@ -341,5 +331,200 @@ TEST_CASE("Float UNorm SNorm Conversion", "[Common]")
     //
     REQUIRE( (uint32)FloatToUNorm<uint8>(2.0f)   == 255 );
     REQUIRE( (uint32)FloatToUNorm<uint8>(-1.0f)  == 0 );
+  }
+}
+
+TEST_CASE("Sign", "[Common]")
+{
+  SECTION("uint8")
+  {
+    REQUIRE( Sign(uint8( 42)) ==  1 );
+    REQUIRE( Sign(uint8( 0)) ==  0 );
+  }
+
+  SECTION("uint16")
+  {
+    REQUIRE( Sign(uint16( 42)) ==  1 );
+    REQUIRE( Sign(uint16( 0)) ==  0 );
+  }
+
+  SECTION("uint32")
+  {
+    REQUIRE( Sign(uint32( 42)) ==  1 );
+    REQUIRE( Sign(uint32( 0)) ==  0 );
+  }
+
+  SECTION("uint64")
+  {
+    REQUIRE( Sign(uint64( 42)) ==  1 );
+    REQUIRE( Sign(uint64( 0)) ==  0 );
+  }
+
+  SECTION("int8")
+  {
+    REQUIRE( Sign(int8(-42)) == -1 );
+    REQUIRE( Sign(int8( 42)) ==  1 );
+    REQUIRE( Sign(int8( 0)) ==  0 );
+  }
+
+  SECTION("int16")
+  {
+    REQUIRE( Sign(int16(-42)) == -1 );
+    REQUIRE( Sign(int16( 42)) ==  1 );
+    REQUIRE( Sign(int16( 0)) ==  0 );
+  }
+
+  SECTION("int32")
+  {
+    REQUIRE( Sign(int32(-42)) == -1 );
+    REQUIRE( Sign(int32( 42)) ==  1 );
+    REQUIRE( Sign(int32( 0)) ==  0 );
+  }
+
+  SECTION("int64")
+  {
+    REQUIRE( Sign(int64(-42)) == -1 );
+    REQUIRE( Sign(int64( 42)) ==  1 );
+    REQUIRE( Sign(int64( 0)) ==  0 );
+  }
+
+  SECTION("float")
+  {
+    REQUIRE( Sign(-42.1337f) == -1 );
+    REQUIRE( Sign( 42.1337f) ==  1 );
+    REQUIRE( Sign( 0.00000f) ==  0 );
+  }
+
+  SECTION("double")
+  {
+    REQUIRE( Sign(-42.1337) == -1 );
+    REQUIRE( Sign( 42.1337) ==  1 );
+    REQUIRE( Sign( 0.00000) ==  0 );
+  }
+}
+
+TEST_CASE("Abs", "[Common]")
+{
+  SECTION("uint8")
+  {
+    REQUIRE( Abs(uint8(1)) == 1 );
+    REQUIRE( Abs(IntMaxValue<uint8>()) == IntMaxValue<uint8>() );
+  }
+
+  SECTION("uint16")
+  {
+    REQUIRE( Abs(uint16(1)) == 1 );
+    REQUIRE( Abs(IntMaxValue<uint16>()) == IntMaxValue<uint16>() );
+  }
+
+  SECTION("uint32")
+  {
+    REQUIRE( Abs(uint32(1)) == 1 );
+    REQUIRE( Abs(IntMaxValue<uint32>()) == IntMaxValue<uint32>() );
+  }
+
+  SECTION("uint64")
+  {
+    REQUIRE( Abs(uint64(1)) == 1 );
+    REQUIRE( Abs(IntMaxValue<uint64>()) == IntMaxValue<uint64>() );
+  }
+
+  SECTION("int8")
+  {
+    REQUIRE( Abs(int8(1)) == 1 );
+    REQUIRE( Abs(int8(-1)) == 1 );
+    REQUIRE( Abs(IntMaxValue<int8>()) == IntMaxValue<int8>() );
+    REQUIRE( Abs(IntMinValue<int8>() + 1) == IntMaxValue<int8>() );
+  }
+
+  SECTION("int16")
+  {
+    REQUIRE( Abs(int16(1)) == 1 );
+    REQUIRE( Abs(int16(-1)) == 1 );
+    REQUIRE( Abs(IntMaxValue<int16>()) == IntMaxValue<int16>() );
+    REQUIRE( Abs(IntMinValue<int16>() + 1) == IntMaxValue<int16>() );
+  }
+
+  SECTION("int32")
+  {
+    REQUIRE( Abs(int32(1)) == 1 );
+    REQUIRE( Abs(int32(-1)) == 1 );
+    REQUIRE( Abs(IntMaxValue<int32>()) == IntMaxValue<int32>() );
+    REQUIRE( Abs(IntMinValue<int32>() + 1) == IntMaxValue<int32>() );
+  }
+
+  SECTION("int64")
+  {
+    REQUIRE( Abs(int64(1)) == 1 );
+    REQUIRE( Abs(int64(-1)) == 1 );
+    REQUIRE( Abs(IntMinValue<int64>() + 1) == IntMaxValue<int64>() );
+    REQUIRE( Abs(IntMaxValue<int64>()) == IntMaxValue<int64>() );
+  }
+
+  SECTION("float")
+  {
+    REQUIRE( Abs( 1.0f) == 1.0f );
+    REQUIRE( Abs(-1.0f) == 1.0f );
+  }
+
+  SECTION("double")
+  {
+    REQUIRE( Abs( 1.0) == 1.0 );
+    REQUIRE( Abs(-1.0) == 1.0 );
+  }
+}
+
+
+TEST_CASE("Rounding", "[Common]")
+{
+  SECTION("RoundDown")
+  {
+    REQUIRE( RoundDown<int>( 3.40f) ==  3 );
+    REQUIRE( RoundDown<int>( 3.50f) ==  3 );
+    REQUIRE( RoundDown<int>( 3.60f) ==  3 );
+    REQUIRE( RoundDown<int>(-3.40f) == -4 );
+    REQUIRE( RoundDown<int>(-3.50f) == -4 );
+    REQUIRE( RoundDown<int>(-3.60f) == -4 );
+  }
+
+  SECTION("RoundUp")
+  {
+    REQUIRE( RoundUp<int>( 3.40f) ==  4 );
+    REQUIRE( RoundUp<int>( 3.50f) ==  4 );
+    REQUIRE( RoundUp<int>( 3.60f) ==  4 );
+    REQUIRE( RoundUp<int>(-3.40f) == -3 );
+    REQUIRE( RoundUp<int>(-3.50f) == -3 );
+    REQUIRE( RoundUp<int>(-3.60f) == -3 );
+  }
+
+  SECTION("RoundTowardsZero")
+  {
+    REQUIRE( RoundTowardsZero<int>( 3.40f) ==  3 );
+    REQUIRE( RoundTowardsZero<int>( 3.50f) ==  3 );
+    REQUIRE( RoundTowardsZero<int>( 3.60f) ==  3 );
+    REQUIRE( RoundTowardsZero<int>(-3.40f) == -3 );
+    REQUIRE( RoundTowardsZero<int>(-3.50f) == -3 );
+    REQUIRE( RoundTowardsZero<int>(-3.60f) == -3 );
+  }
+
+  SECTION("RoundAwayFromZero")
+  {
+    REQUIRE( RoundAwayFromZero<int>( 3.40f) ==  4 );
+    REQUIRE( RoundAwayFromZero<int>( 3.50f) ==  4 );
+    REQUIRE( RoundAwayFromZero<int>( 3.60f) ==  4 );
+    REQUIRE( RoundAwayFromZero<int>(-3.40f) == -4 );
+    REQUIRE( RoundAwayFromZero<int>(-3.50f) == -4 );
+    REQUIRE( RoundAwayFromZero<int>(-3.60f) == -4 );
+  }
+
+  SECTION("Round")
+  {
+    REQUIRE( Round<int>( 3.40f) ==  3 );
+    REQUIRE( Round<int>( 3.50f) ==  4 );
+    REQUIRE( Round<int>( 3.60f) ==  4 );
+    REQUIRE( Round<int>(-3.40f) == -3 );
+    REQUIRE( Round<int>(-3.50f) == -3 );
+    REQUIRE( Round<int>(-3.51f) == -4 );
+    REQUIRE( Round<int>(-3.60f) == -4 );
   }
 }
