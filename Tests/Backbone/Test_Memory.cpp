@@ -88,7 +88,7 @@ TEST_CASE("Memory Construction", "[Memory]")
     REQUIRE( Counters->Ctor == 1 * Convert<int>(Foos.Num) );
     REQUIRE( Counters->Dtor == 0 * Convert<int>(Foos.Num) );
 
-    MemSetBytes(Foos.Num * SizeOf<foo>(), &Foos[0], 0);
+    MemSetBytes(Bytes(Foos.Num * SizeOf<foo>()), &Foos[0], 0);
 
     MemConstruct(Foos.Num, &Foos.Data[0]);
     REQUIRE( Counters->Ctor == 2 * Convert<int>(Foos.Num) );

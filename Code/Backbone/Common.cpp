@@ -6,6 +6,34 @@
 //~~[[
 
 auto
+::operator +=(memory_size& A, memory_size B)
+  -> void
+{
+  A.InternalBytes += B.InternalBytes;
+}
+
+auto
+::operator -=(memory_size& A, memory_size B)
+  -> void
+{
+  A.InternalBytes -= B.InternalBytes;
+}
+
+auto
+::operator *=(memory_size& A, uint64 Scale)
+  -> void
+{
+  A.InternalBytes *= Scale;
+}
+
+auto
+::operator /=(memory_size& A, uint64 Scale)
+  -> void
+{
+  A.InternalBytes /= Scale;
+}
+
+auto
 ::Pow(float Base, float Exponent)
   -> float
 {

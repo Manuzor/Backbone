@@ -53,15 +53,27 @@ TEST_CASE("Defer", "[Common]")
 
 TEST_CASE("Byte Sizes", "[Common]")
 {
-  REQUIRE(KiB(3) == 3 * 1024ULL);
-  REQUIRE(MiB(3) == 3 * 1024ULL * 1024ULL);
-  REQUIRE(GiB(3) == 3 * 1024ULL * 1024ULL * 1024ULL);
-  REQUIRE(TiB(3) == 3 * 1024ULL * 1024ULL * 1024ULL * 1024ULL);
+  REQUIRE( ToBytes(KiB(3)) == 3 * 1024ULL );
+  REQUIRE( ToBytes(MiB(3)) == 3 * 1024ULL * 1024ULL );
+  REQUIRE( ToBytes(GiB(3)) == 3 * 1024ULL * 1024ULL * 1024ULL );
+  REQUIRE( ToBytes(TiB(3)) == 3 * 1024ULL * 1024ULL * 1024ULL * 1024ULL );
 
-  REQUIRE(KB(3) == 3 * 1000ULL);
-  REQUIRE(MB(3) == 3 * 1000ULL * 1000ULL);
-  REQUIRE(GB(3) == 3 * 1000ULL * 1000ULL * 1000ULL);
-  REQUIRE(TB(3) == 3 * 1000ULL * 1000ULL * 1000ULL * 1000ULL);
+  REQUIRE( ToBytes(KB(3)) == 3 * 1000ULL );
+  REQUIRE( ToBytes(MB(3)) == 3 * 1000ULL * 1000ULL );
+  REQUIRE( ToBytes(GB(3)) == 3 * 1000ULL * 1000ULL * 1000ULL );
+  REQUIRE( ToBytes(TB(3)) == 3 * 1000ULL * 1000ULL * 1000ULL * 1000ULL );
+
+  REQUIRE( ToKiB(Bytes(512)) == 0.5f );
+  REQUIRE( ToKiB<uint64>(Bytes(512)) == 0 );
+  REQUIRE( ToKiB<uint32>(Bytes(512)) == 0 );
+  REQUIRE( ToKiB<uint16>(Bytes(512)) == 0 );
+  REQUIRE( ToKiB<uint8>(Bytes(512)) == 0 );
+
+  REQUIRE( ToKiB(Bytes(2 * 1024)) == 2.0f );
+  REQUIRE( ToKiB<uint64>(Bytes(2 * 1024)) == 2 );
+  REQUIRE( ToKiB<uint32>(Bytes(2 * 1024)) == 2 );
+  REQUIRE( ToKiB<uint16>(Bytes(2 * 1024)) == 2 );
+  REQUIRE( ToKiB<uint8>(Bytes(2 * 1024)) == 2 );
 }
 
 TEST_CASE("Array Count", "[Common]")
@@ -150,6 +162,30 @@ TEST_CASE("AsConst", "[Common]")
   REQUIRE(casts::helper(AsConst(Data)) == 64);
   REQUIRE(casts::helper(&Data) == 128);
   REQUIRE(casts::helper(AsPtrToConst(&Data)) == 512);
+}
+
+TEST_CASE("IsPowerOfTwo", "[Common]")
+{
+  size_t Iteration = 0;
+  for(size_t Index = 0; Index < NumBits<size_t>(); ++Index)
+  {
+    CAPTURE( Index );
+    auto Integer = size_t(1) << Index;
+    CAPTURE( Integer );
+    REQUIRE( IsPowerOfTwo(Integer) );
+  }
+
+  auto NegativeTest = [](size_t Argument)
+  {
+    CAPTURE(Argument);
+    REQUIRE( !IsPowerOfTwo(Argument) );
+  };
+
+  NegativeTest( 3 );
+  NegativeTest( 5 );
+  NegativeTest( 6 );
+  NegativeTest( 12 );
+  NegativeTest( 1024-1 );
 }
 
 TEST_CASE("Min", "[Common]")

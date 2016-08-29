@@ -137,15 +137,59 @@ DefineArrayTypes(uint64);
 // ================
 //
 
-constexpr uint64 KiB(uint64 Amount) { return Amount      * (uint64)1024; }
-constexpr uint64 MiB(uint64 Amount) { return KiB(Amount) * (uint64)1024; }
-constexpr uint64 GiB(uint64 Amount) { return MiB(Amount) * (uint64)1024; }
-constexpr uint64 TiB(uint64 Amount) { return GiB(Amount) * (uint64)1024; }
+struct memory_size
+{
+  uint64 InternalBytes;
 
-constexpr uint64 KB(uint64 Amount) { return Amount     * (uint64)1000; }
-constexpr uint64 MB(uint64 Amount) { return KB(Amount) * (uint64)1000; }
-constexpr uint64 GB(uint64 Amount) { return MB(Amount) * (uint64)1000; }
-constexpr uint64 TB(uint64 Amount) { return GB(Amount) * (uint64)1000; }
+  constexpr
+  operator size_t() const
+  {
+    // TODO: Ensure safe conversion?
+    return (size_t)InternalBytes;
+  }
+};
+
+constexpr bool operator ==(memory_size A, memory_size B) { return A.InternalBytes == B.InternalBytes; }
+constexpr bool operator !=(memory_size A, memory_size B) { return A.InternalBytes != B.InternalBytes; }
+constexpr bool operator < (memory_size A, memory_size B) { return A.InternalBytes <  B.InternalBytes; }
+constexpr bool operator <=(memory_size A, memory_size B) { return A.InternalBytes <= B.InternalBytes; }
+constexpr bool operator > (memory_size A, memory_size B) { return A.InternalBytes >  B.InternalBytes; }
+constexpr bool operator >=(memory_size A, memory_size B) { return A.InternalBytes >= B.InternalBytes; }
+
+constexpr memory_size operator +(memory_size A, memory_size B) { return { A.InternalBytes + B.InternalBytes }; }
+constexpr memory_size operator -(memory_size A, memory_size B) { return { A.InternalBytes - B.InternalBytes }; }
+constexpr memory_size operator *(memory_size A, uint64 Scale) { return { A.InternalBytes * Scale };   }
+constexpr memory_size operator *(uint64 Scale, memory_size A) { return { Scale * A.InternalBytes };   }
+constexpr memory_size operator /(memory_size A, uint64 Scale) { return { A.InternalBytes / Scale };   }
+
+void operator +=(memory_size& A, memory_size B);
+void operator -=(memory_size& A, memory_size B);
+void operator *=(memory_size& A, uint64 Scale);
+void operator /=(memory_size& A, uint64 Scale);
+
+constexpr memory_size Bytes(uint64 Amount) { return { Amount }; }
+constexpr uint64 ToBytes(memory_size Size) { return Size.InternalBytes; }
+
+constexpr memory_size KiB(uint64 Amount) { return { Amount * 1024 }; }
+constexpr memory_size MiB(uint64 Amount) { return { Amount * 1024 * 1024 }; }
+constexpr memory_size GiB(uint64 Amount) { return { Amount * 1024 * 1024 * 1024 }; }
+constexpr memory_size TiB(uint64 Amount) { return { Amount * 1024 * 1024 * 1024 * 1024 }; }
+
+constexpr memory_size KB(uint64 Amount) { return { Amount * 1000 }; }
+constexpr memory_size MB(uint64 Amount) { return { Amount * 1000 * 1000 }; }
+constexpr memory_size GB(uint64 Amount) { return { Amount * 1000 * 1000 * 1000 }; }
+constexpr memory_size TB(uint64 Amount) { return { Amount * 1000 * 1000 * 1000 * 1000 }; }
+
+template<typename OutputType = float> constexpr OutputType ToKiB(memory_size Size) { return OutputType(double(Size.InternalBytes) / 1024); }
+template<typename OutputType = float> constexpr OutputType ToMiB(memory_size Size) { return OutputType(double(Size.InternalBytes) / 1024 / 1024); }
+template<typename OutputType = float> constexpr OutputType ToGiB(memory_size Size) { return OutputType(double(Size.InternalBytes) / 1024 / 1024 / 1024); }
+template<typename OutputType = float> constexpr OutputType ToTiB(memory_size Size) { return OutputType(double(Size.InternalBytes) / 1024 / 1024 / 1024 / 1024); }
+
+template<typename OutputType = float> constexpr OutputType ToKB(memory_size Size) { return OutputType(double(Size.InternalBytes) / 1000); }
+template<typename OutputType = float> constexpr OutputType ToMB(memory_size Size) { return OutputType(double(Size.InternalBytes) / 1000 / 1000); }
+template<typename OutputType = float> constexpr OutputType ToGB(memory_size Size) { return OutputType(double(Size.InternalBytes) / 1000 / 1000 / 1000); }
+template<typename OutputType = float> constexpr OutputType ToTB(memory_size Size) { return OutputType(double(Size.InternalBytes) / 1000 / 1000 / 1000 / 1000); }
+
 
 constexpr uint32 SetBit(uint32 Bits, uint32 Position) { return Bits | (uint32(1) << Position); }
 constexpr uint32 UnsetBit(uint32 Bits, uint32 Position) { return Bits & ~(uint32(1) << Position); }
@@ -155,6 +199,7 @@ constexpr uint64 SetBit(uint64 Bits, uint64 Position) { return Bits | (uint64(1)
 constexpr uint64 UnsetBit(uint64 Bits, uint64 Position) { return Bits & ~(uint64(1) << Position); }
 constexpr bool IsBitSet(uint64 Bits, uint64 Position) { return !!(Bits & (uint64(1) << Position)); }
 
+constexpr bool IsPowerOfTwo(size_t Value) { return Value < 1 ? false : (Value & (Value - 1)) == 0; }
 
 //
 // ================
@@ -177,7 +222,7 @@ template<typename t_type, size_t N>
 constexpr size_t
 ArrayCount(t_type(&)[N]) { return N; }
 
-template<typename T> struct impl_size_of { enum { Value = sizeof(T) }; };
+template<typename T> struct impl_size_of { enum { SizeInBytes = sizeof(T) }; };
 template<>           struct impl_size_of<void>          : impl_size_of<uint8>          { };
 template<>           struct impl_size_of<void const>    : impl_size_of<uint8 const>    { };
 template<>           struct impl_size_of<void volatile> : impl_size_of<uint8 volatile> { };
@@ -186,8 +231,8 @@ template<>           struct impl_size_of<void volatile> : impl_size_of<uint8 vol
 ///
 /// Same as sizeof(T) except it works also with 'void' (possibly cv-qualified) where a size of 1 byte is assumed.
 template<typename T>
-constexpr size_t
-SizeOf() { return impl_size_of<T>::Value; }
+constexpr memory_size
+SizeOf() { return Bytes(impl_size_of<T>::SizeInBytes); }
 
 /// Reinterpretation of the given pointer in case t_pointer_type is `void`.
 template<typename t_pointer_type>
@@ -231,7 +276,7 @@ template<typename t_pointer_type, typename OffsetType>
 constexpr t_pointer_type*
 MemAddOffset(t_pointer_type* Pointer, OffsetType Offset)
 {
-  return MemAddByteOffset(Pointer, Offset * SizeOf<t_pointer_type>());
+  return MemAddByteOffset(Pointer, Offset * ToBytes(SizeOf<t_pointer_type>()));
 }
 
 // TODO: This is MSVC specific right now.

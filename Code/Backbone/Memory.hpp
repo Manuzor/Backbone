@@ -32,20 +32,20 @@ RESERVE_PREFIX(Mem);
 ///
 /// Destination and Source may overlap.
 void
-MemCopyBytes(size_t NumBytes, void* Destination, void const* Source);
+MemCopyBytes(memory_size Size, void* Destination, void const* Source);
 
 /// Fill NumBytes in Destination with the value
 void
-MemSetBytes(size_t NumBytes, void* Destination, int Value);
+MemSetBytes(memory_size Size, void* Destination, int Value);
 
 bool
-MemEqualBytes(size_t NumBytes, void const* A, void const* B);
+MemEqualBytes(memory_size Size, void const* A, void const* B);
 
 int
-MemCompareBytes(size_t NumBytes, void const* A, void const* B);
+MemCompareBytes(memory_size Size, void const* A, void const* B);
 
 bool
-MemAreOverlapping(size_t NumBytesA, void const* A, size_t NumBytesB, void const* B);
+MemAreOverlapping(memory_size SizeA, void const* A, memory_size SizeB, void const* B);
 
 
 /// Calls the constructor of all elements in Destination with Args.
