@@ -34,7 +34,7 @@
   #define BoundsCheck(...) NoOp
 #endif
 
-#ifdef DEBUG
+#if defined(DEBUG)
   #define BB_Debugging 1
 #endif
 
