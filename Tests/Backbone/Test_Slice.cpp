@@ -190,6 +190,16 @@ TEST_CASE("Slice Searching", "[Slice]")
     REQUIRE( SliceCountUntil(AsConst(Foo), 6) == 6 );
     REQUIRE( SliceCountUntil(AsConst(Foo), 7) == INVALID_INDEX );
   }
+
+  SECTION("CountUntil with predicate")
+  {
+    REQUIRE( SliceCountUntil(Slice<int const>((size_t)0, nullptr), 42) == INVALID_INDEX );
+
+    REQUIRE( SliceCountUntil(AsConst(Foo), -1, [](int A, int B){ return A == 0; }) == 0 );
+    REQUIRE( SliceCountUntil(AsConst(Foo), -1, [](int A, int B){ return A == 2; }) == 2 );
+    REQUIRE( SliceCountUntil(AsConst(Foo), -1, [](int A, int B){ return A == 6; }) == 6 );
+    REQUIRE( SliceCountUntil(AsConst(Foo), -1, [](int A, int B){ return A == 7; }) == INVALID_INDEX );
+  }
 }
 
 TEST_CASE("Slice Misc", "[Slice]")
